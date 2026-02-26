@@ -346,6 +346,16 @@
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #fafaf8; }
   tbody tr.main-row { cursor: pointer; }
+  /* Multisite group: visual grouping for same-creator sites */
+  tr.multisite-group {
+    border-left: 4px solid var(--blue);
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.04) 0%, transparent 100%);
+  }
+  tr.multisite-group.expanded-row td { background: #fafaf8; }
+  tr.multisite-group.expanded-row {
+    border-left: 4px solid var(--blue);
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.06) 0%, #fafaf8 100%);
+  }
   tbody td {
     padding: 10px 14px;
     vertical-align: middle;
@@ -755,6 +765,27 @@
   }
   .site-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   .site-card.expanded { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .multisite-card-group {
+    grid-column: 1 / -1;
+    border-left: 4px solid var(--blue);
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
+    border-radius: 8px;
+    padding: 12px 12px 12px 16px;
+    margin-bottom: 8px;
+  }
+  .multisite-card-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+  .multisite-card-group .multisite-card-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .card-header strong { font-size: 14px; }
   .card-badge { font-size: 12px; color: var(--text-muted); }
@@ -1150,14 +1181,13 @@
           <th style="width:32px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
           <th class="col-site sortable" data-sort="name">Site Name</th>
           <th class="col-ad-network sortable" data-sort="adNetwork">Ad Network</th>
-          <th class="col-existing-creator">Multisite</th>
           <th class="col-owner sortable" data-sort="owner">Owner</th>
           <th class="col-progress">Progress</th>
           <th class="col-badge sortable" data-sort="dcGeneral">Data Collection</th>
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
           <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
-          <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="installDate">Install Date</option><option value="secondAnalysis">Second Analysis</option><option value="startDate">Start Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
+          <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option><option value="secondAnalysisDate">Second Analysis Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
           <th class="col-badge">Zendesk Ticket</th>
           <th class="col-badge sortable" data-sort="lastUpdated">Last Updated</th>
           <th class="col-notes">Notes</th>
@@ -1190,7 +1220,7 @@ function hoursAgo(h) { return NOW - h * H; }
 const SALESFORCE_LINK = 'https://cafemedia.lightning.force.com/lightning/r/MPM4_BASE__Milestone1_Project__c/a0zQQ000001vxcHYAQ/view';
 const OWNERS = ['Antoinette', 'Amy', 'Michelle', 'Whitney'];
 const SERVICE_LEVELS = ['Rise', 'Insider', 'Platinum', 'Platinum Elite', 'Luminary', 'Enterprise'];
-let dynamicDateType = 'installDate'; // 'installDate' | 'secondAnalysis' | 'startDate'
+let dynamicDateType = 'actualStartDate'; // 'actualStartDate' | 'expectedInstallDate' | 'scheduledInstallDate' | 'secondAnalysisDate'
 let sortColumn = null;
 let sortAsc = true;
 const EXAMPLE_NOTES = ['Creator on vacation', 'Creator slow to respond', 'Waiting for docs', 'Follow up scheduled', null, null, null];
@@ -1517,9 +1547,10 @@ function expandedContentHtml(site) {
 }
 
 function expandedHtml(site) {
+  const multisiteClass = site.multisiteCount > 1 ? ' multisite-group' : '';
   return `
-    <tr class="expanded-row" id="exp-${site.name.replace(/\s/g,'_')}">
-      <td colspan="14">
+    <tr class="expanded-row${multisiteClass}" id="exp-${site.name.replace(/\s/g,'_')}">
+      <td colspan="13">
         <div class="expanded-content">${expandedContentHtml(site)}</div>
       </td>
     </tr>`;
@@ -1550,9 +1581,10 @@ function onRowClick(evt, name) {
 }
 
 function getDynamicDateValue(site) {
-  if (dynamicDateType === 'installDate') return site.installDate || '';
-  if (dynamicDateType === 'startDate') return site.startDate || '';
-  if (dynamicDateType === 'secondAnalysis' && site.secondAnalysis?.stateStartedAt) {
+  if (dynamicDateType === 'actualStartDate') return site.startDate || '';
+  if (dynamicDateType === 'expectedInstallDate') return site.expectedInstallDate || site.installDate || '';
+  if (dynamicDateType === 'scheduledInstallDate') return site.scheduledInstallDate || site.installDate || '';
+  if (dynamicDateType === 'secondAnalysisDate' && site.secondAnalysis?.stateStartedAt) {
     const d = new Date(site.secondAnalysis.stateStartedAt);
     return d.toISOString().slice(0,10);
   }
@@ -1572,17 +1604,18 @@ function renderTable(sites) {
   if (cardContainer) cardContainer.style.display = viewMode === 'card' ? '' : 'none';
   if (viewMode === 'table') expandedCardSite = null;
 
+  let cardIndex = 0;
   sites.forEach(site => {
     const key = site.name.replace(/\s/g,'_');
     const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
     const ownerVal = site.owner || '';
     const ownerOptions = '<option value="">—</option>' + OWNERS.map(o => `<option value="${o}" ${o === ownerVal ? 'selected' : ''}>${o}</option>`).join('');
     const dynamicDateVal = getDynamicDateValue(site);
-    const multisiteVal = site.multisiteCount ? String(site.multisiteCount) : '';
     const nextStep = getNextStep(site, dcGeneral, saGeneral, ssGeneral, sa2General);
 
     const tr = document.createElement('tr');
-    tr.className = 'main-row';
+    tr.className = 'main-row' + (site.multisiteCount > 1 ? ' multisite-group' : '');
+    if (site.multisiteCount > 1) tr.dataset.creator = site.creatorName || '';
     tr.onclick = (evt) => onRowClick(evt, site.name);
     tr.dataset.name = site.name.toLowerCase();
     tr.dataset.siteStatus = site.siteStatus;
@@ -1597,7 +1630,6 @@ function renderTable(sites) {
         ${overdueHtml(site)}
       </td>
       <td>${site.adNetwork || '—'}</td>
-      <td class="col-existing-creator">${multisiteVal || '—'}</td>
       <td class="col-owner"><select class="owner-select" onchange="updateOwner('${site.name}', this.value)" onclick="event.stopPropagation()">${ownerOptions}</select></td>
       <td>
         <div class="progress-wrap">
@@ -1617,48 +1649,71 @@ function renderTable(sites) {
     tbody.appendChild(tr);
 
     if (cardContainer && viewMode === 'card') {
-      const card = document.createElement('div');
-      card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '');
-      card.dataset.siteName = site.name;
-      card.onclick = () => {
-        expandedCardSite = expandedCardSite === site.name ? null : site.name;
-        filterTable();
-      };
-      const dc = site.dataCollection || {};
-      const ss = site.siteSetup || {};
-      card.innerHTML = `
-        <div class="card-header">
-          <strong>${site.name}</strong>
-          <span class="card-badge">${site.progress}%</span>
-        </div>
-        <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
-        <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
-        <div class="card-statuses">
-          <div class="card-status-item">
-            <span class="phase-name">Data Collection</span>
-            <span>${badgeHtml(dcGeneral)}</span>
-          </div>
-          <div class="card-status-item">
-            <span class="phase-name">Site Analysis</span>
-            <span>${badgeHtml(saGeneral)}</span>
-          </div>
-          <div class="card-status-item">
-            <span class="phase-name">Site Setup</span>
-            <span>${badgeHtml(ssGeneral)}</span>
-          </div>
-          <div class="card-status-item">
-            <span class="phase-name">Second Analysis</span>
-            <span>${badgeHtml(sa2General)}</span>
-          </div>
-        </div>
-      `;
-      cardContainer.appendChild(card);
-      if (expandedCardSite === site.name) {
-        const detailsRow = document.createElement('div');
-        detailsRow.className = 'card-details-row';
-        detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
-        cardContainer.appendChild(detailsRow);
+      if (site.multisiteCount > 1) {
+        const prevCreator = cardIndex > 0 ? sites[cardIndex - 1].creatorName : null;
+        const isFirstInGroup = site.creatorName !== prevCreator;
+        if (isFirstInGroup) {
+          const groupSites = sites.filter(s => s.creatorName === site.creatorName && s.multisiteCount > 1);
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'multisite-card-group';
+          const label = document.createElement('div');
+          label.className = 'multisite-card-group-label';
+          label.textContent = `${site.creatorName || 'Creator'} · ${groupSites.length} site${groupSites.length !== 1 ? 's' : ''}`;
+          groupDiv.appendChild(label);
+          const innerDiv = document.createElement('div');
+          innerDiv.className = 'multisite-card-inner';
+          groupSites.forEach(s => {
+            const { dcG, saG, ssG, sa2G } = computeStatus(s);
+            const nxt = getNextStep(s, dcG, saG, ssG, sa2G);
+            const card = document.createElement('div');
+            card.className = 'site-card' + (expandedCardSite === s.name ? ' expanded' : '');
+            card.dataset.siteName = s.name;
+            card.onclick = () => { expandedCardSite = expandedCardSite === s.name ? null : s.name; filterTable(); };
+            card.innerHTML = `
+              <div class="card-header"><strong>${s.name}</strong><span class="card-badge">${s.progress}%</span></div>
+              <div class="card-meta">${s.creatorName || '—'} · ${s.adNetwork || '—'}</div>
+              <div class="card-next-step"><span class="label">Next:</span> ${nxt}</div>
+              <div class="card-statuses">
+                <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcG)}</span></div>
+                <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saG)}</span></div>
+                <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssG)}</span></div>
+                <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2G)}</span></div>
+              </div>`;
+            innerDiv.appendChild(card);
+            if (expandedCardSite === s.name) {
+              const dr = document.createElement('div');
+              dr.className = 'card-details-row';
+              dr.innerHTML = `<div class="expanded-content">${expandedContentHtml(s)}</div>`;
+              innerDiv.appendChild(dr);
+            }
+          });
+          groupDiv.appendChild(innerDiv);
+          cardContainer.appendChild(groupDiv);
+        }
+      } else {
+        const card = document.createElement('div');
+        card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '');
+        card.dataset.siteName = site.name;
+        card.onclick = () => { expandedCardSite = expandedCardSite === site.name ? null : site.name; filterTable(); };
+        card.innerHTML = `
+          <div class="card-header"><strong>${site.name}</strong><span class="card-badge">${site.progress}%</span></div>
+          <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
+          <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
+          <div class="card-statuses">
+            <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcGeneral)}</span></div>
+            <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saGeneral)}</span></div>
+            <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssGeneral)}</span></div>
+            <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2General)}</span></div>
+          </div>`;
+        cardContainer.appendChild(card);
+        if (expandedCardSite === site.name) {
+          const detailsRow = document.createElement('div');
+          detailsRow.className = 'card-details-row';
+          detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
+          cardContainer.appendChild(detailsRow);
+        }
       }
+      cardIndex++;
     }
   });
 
@@ -1706,9 +1761,10 @@ function getNextStep(site, dc, sa, ss, sa2) {
 function updateDynamicDate(siteName, val) {
   const site = SITES.find(s => s.name === siteName);
   if (!site) return;
-  if (dynamicDateType === 'installDate') site.installDate = val || null;
-  else if (dynamicDateType === 'startDate') site.startDate = val || null;
-  else if (dynamicDateType === 'secondAnalysis' && site.secondAnalysis) {
+  if (dynamicDateType === 'actualStartDate') site.startDate = val || null;
+  else if (dynamicDateType === 'expectedInstallDate') site.expectedInstallDate = val || null;
+  else if (dynamicDateType === 'scheduledInstallDate') site.scheduledInstallDate = val || null;
+  else if (dynamicDateType === 'secondAnalysisDate' && site.secondAnalysis) {
     site.secondAnalysis.stateStartedAt = val ? new Date(val).getTime() : null;
   }
   site.lastUpdated = new Date().toISOString().slice(0,10);
@@ -1816,15 +1872,21 @@ function filterTable() {
     return true;
   });
 
-  let result = filtered;
-  if (sortColumn) {
-    result = [...result].sort((a, b) => {
+  let result = [...filtered].sort((a, b) => {
+    // Group multisite onboardings together (same creator)
+    const aGroup = (a.multisiteCount > 1 ? a.creatorName : '') || a.name;
+    const bGroup = (b.multisiteCount > 1 ? b.creatorName : '') || b.name;
+    const groupCmp = String(aGroup).localeCompare(String(bGroup), undefined, { numeric: true });
+    if (groupCmp !== 0) return groupCmp;
+    // Within group, sort by user's column
+    if (sortColumn) {
       const av = getSortValue(a, sortColumn);
       const bv = getSortValue(b, sortColumn);
       const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
       return sortAsc ? cmp : -cmp;
-    });
-  }
+    }
+    return String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true });
+  });
   renderTable(result);
 }
 
