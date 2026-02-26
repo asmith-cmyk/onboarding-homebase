@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding Homebase</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f0;
+    --surface: #ffffff;
+    --border: #e2e2dc;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-light: #9b9b9b;
+    --green: #2d7a4f;
+    --green-bg: #e8f5ee;
+    --blue: #1a5fa8;
+    --blue-bg: #e5eef9;
+    --amber: #a06c00;
+    --amber-bg: #fef3d0;
+    --red: #c0392b;
+    --red-bg: #fde8e5;
+    --purple: #6b46c1;
+    --purple-bg: #ede9f8;
+    --gray: #5a5a5a;
+    --gray-bg: #f0f0ee;
+    --accent: #2d7a4f;
+    --header-bg: #1c3d2e;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* TOP NAV */
+  .top-nav {
+    background: var(--header-bg);
+    color: white;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .top-nav .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .top-nav .divider { opacity: 0.3; margin: 0 4px; }
+  .top-nav .page-title { font-size: 13px; opacity: 0.7; }
+
+  /* MAIN LAYOUT */
+  .page {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* FILTERS PANEL */
+  .filters-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .filters-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .filters-header:hover {
+    background: #fafaf8;
+  }
+  .filters-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .filters-header .chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .filters-wrapper.collapsed .chevron {
+    transform: rotate(-90deg);
+  }
+  .filters-panel {
+    padding: 8px 20px 20px;
+    position: relative;
+  }
+  .filters-wrapper.collapsed .filters-panel {
+    display: none;
+  }
+  .filters-panel .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1;
+  }
+  .filter-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .filter-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .filter-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .filter-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .filter-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .filter-row:last-child { margin-bottom: 0; }
+
+  .filter-presets {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .filter-presets label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 0;
+  }
+  .preset-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-preset {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-preset:hover {
+    background: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .filter-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .filter-group input, .filter-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .filter-group input:focus, .filter-group select:focus {
+    border-color: var(--accent);
+  }
+  .filter-group .input-wrap {
+    position: relative;
+  }
+  .filter-group .input-wrap .clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--red);
+    font-size: 16px;
+    line-height: 1;
+    display: none;
+  }
+  .filter-group .input-wrap input:not(:placeholder-shown) + .clear-btn {
+    display: block;
+  }
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .stat-card .value {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .stat-card.needs-attention .value { color: var(--red); }
+  .stat-card.progress .value { color: var(--blue); }
+  .stat-card.done .value { color: var(--green); }
+  .stat-card.overall .value { color: var(--text); }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-toolbar h2 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toggle-group {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .toggle-group button {
+    padding: 6px 14px;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .toggle-group button.active {
+    background: var(--text);
+    color: white;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    background: #1c3d2e;
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 10px 14px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 0; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafaf8; }
+  tbody tr.main-row { cursor: pointer; }
+  tbody td {
+    padding: 10px 14px;
+    vertical-align: middle;
+    font-size: 12.5px;
+  }
+  .site-name-cell a {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .site-name-cell a:hover { text-decoration: underline; }
+  .site-url {
+    color: var(--blue);
+    text-decoration: none;
+    font-size: 11.5px;
+  }
+  .site-url:hover { text-decoration: underline; }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .progress-bar {
+    width: 60px;
+    height: 5px;
+    background: #e5e5e0;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--green);
+    transition: width 0.3s;
+  }
+  .progress-fill.low { background: var(--red); }
+  .progress-fill.mid { background: var(--blue); }
+  .progress-fill.high { background: var(--green); }
+  .progress-pct {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    min-width: 30px;
+  }
+
+  /* OVERDUE TEXT */
+  .overdue { color: var(--red); font-size: 11px; font-weight: 500; }
+  .today { color: var(--amber); font-size: 11px; font-weight: 500; }
+
+  /* STATUS BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .badge.done { background: var(--green-bg); color: var(--green); }
+  .badge.active { background: var(--blue-bg); color: var(--blue); }
+  .badge.waiting { background: var(--amber-bg); color: var(--amber); }
+  .badge.needs-attention { background: var(--red-bg); color: var(--red); }
+  .badge.requested { background: var(--purple-bg); color: var(--purple); }
+  .badge.pending { background: var(--amber-bg); color: var(--amber); }
+  .badge.approved { background: var(--green-bg); color: var(--green); }
+  .badge.rejected { background: var(--red-bg); color: var(--red); }
+  .badge.not-started { background: var(--gray-bg); color: var(--gray); }
+  .badge.accepted { background: var(--green-bg); color: var(--green); }
+  .badge.in-progress { background: var(--blue-bg); color: var(--blue); }
+  /* Second Analysis time-sensitive badges */
+  .badge.sa2-requested       { background: var(--amber-bg); color: var(--amber); }
+  .badge.sa2-requested-late  { background: var(--red-bg);   color: var(--red); }
+  .badge.sa2-in-progress     { background: var(--blue-bg); color: var(--blue); }
+  .badge.sa2-needs-accept    { background: var(--amber-bg); color: var(--amber); }
+  .badge.sa2-needs-accept-late { background: var(--red-bg); color: var(--red); }
+
+  /* EXPANDED ROW */
+  .expand-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 2px 4px;
+    transition: transform 0.2s;
+  }
+  .expand-btn.open { transform: rotate(90deg); }
+
+  .expanded-row td {
+    padding: 0;
+    background: #fafaf8;
+  }
+  .expanded-content {
+    padding: 16px 14px 16px 14px;
+    display: grid;
+    grid-template-columns: 32px 120px 80px 80px 90px 100px minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr);
+    gap: 0 12px;
+    border-top: 1px solid var(--border);
+    align-items: start;
+  }
+  .quick-info {
+    grid-column: 1 / 7;
+    background: #f5f5f2;
+    border-radius: 6px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .quick-info h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .quick-info-row {
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .quick-info-row:last-child { margin-bottom: 0; }
+  .quick-info-row .label { color: var(--text-muted); font-size: 11px; }
+  .quick-info-row .value { display: block; margin-top: 2px; }
+  .quick-info-row a { color: var(--blue); text-decoration: none; }
+  .quick-info-toggle { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .quick-info-toggle .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .quick-info-toggle .escalated-toggle { cursor: pointer; }
+  .quick-info-row a:hover { text-decoration: underline; }
+  .expanded-sections {
+    grid-column: 7 / 11;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 12px;
+  }
+  .expanded-section h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .sub-status-row .sub-label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  /* ACTION BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-view { background: #f0f0ee; color: var(--text); border: 1px solid var(--border); }
+  .btn-view:hover { background: #e5e5e0; }
+  .btn-continue { background: var(--blue); color: white; }
+  .btn-continue:hover { background: #1550a0; }
+  .btn-complete { background: var(--red); color: white; }
+  .btn-complete:hover { background: #a52b1f; }
+  .btn-link-app {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 5px; font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px; font-weight: 500; cursor: pointer; text-decoration: none;
+    background: var(--green-bg); color: var(--green);
+    border: 1px solid #b6dfc8; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-link-app:hover { background: #d2efdf; }
+  .btn-link-zen {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 5px; font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px; font-weight: 500; cursor: pointer; text-decoration: none;
+    background: var(--blue-bg); color: var(--blue);
+    border: 1px solid #b3cfe8; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-link-zen:hover { background: #ccdff5; }
+
+  /* FOOTER */
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: #fafaf8;
+  }
+  .table-footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .footer-actions { display: flex; gap: 8px; }
+  .btn-outline {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-outline:hover { background: var(--gray-bg); }
+  .btn-primary {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { background: #a52b1f; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: var(--red);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .alert-banner .left { display: flex; align-items: center; gap: 10px; }
+  .alert-banner .icon {
+    width: 24px; height: 24px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .alert-banner strong { font-size: 13px; font-weight: 600; }
+  .alert-banner p { font-size: 12px; opacity: 0.85; margin-top: 1px; }
+  .alert-btn {
+    background: white;
+    color: var(--red);
+    border: none;
+    padding: 7px 16px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* Bulk action bar */
+  .bulk-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .bulk-select {
+    padding: 7px 28px 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    background: var(--surface);
+    appearance: none;
+    -webkit-appearance: none;
+    color: var(--text);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b6b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    outline: none;
+  }
+
+  .col-site { min-width: 120px; }
+  .col-url { min-width: 100px; }
+  .col-owner { min-width: 90px; }
+  .col-progress { min-width: 100px; }
+  .owner-select {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    background: var(--surface);
+    min-width: 90px;
+  }
+  .install-date-input {
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    background: var(--surface);
+    min-width: 95px;
+  }
+  .existing-creator-check { color: var(--green); font-size: 16px; }
+  .col-existing-creator {
+    min-width: 80px;
+    max-width: 90px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    
+  }
+  thead th.col-existing-creator { white-space: normal; }
+  .col-creator { min-width: 90px; }
+  .col-service { min-width: 80px; }
+  .col-ad-network { min-width: 80px; }
+  .col-notes { min-width: 100px; }
+  .notes-tooltip {
+    cursor: help;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    position: relative;
+  }
+  .notes-tooltip:hover { background: var(--gray-bg); color: var(--text); }
+  .notes-input {
+    width: 100%;
+    min-width: 90px;
+    max-width: 160px;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    background: transparent;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .notes-input:hover { border-color: var(--border); background: var(--surface); }
+  .notes-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+  .notes-input::placeholder { color: var(--text-light); }
+  .sortable { cursor: pointer; }
+  .sortable:hover { text-decoration: underline; }
+  .date-type-select {
+    padding: 4px 8px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px;
+    font-size: 11px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    cursor: pointer;
+  }
+  .date-type-select option { color: var(--text); background: var(--surface); }
+  .date-col-header { display: flex; align-items: center; gap: 6px; }
+  .sort-indicator {
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0.7;
+    padding: 2px 4px;
+  }
+  .sort-indicator:hover { opacity: 1; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .site-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+  .site-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .site-card.expanded { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-header strong { font-size: 14px; }
+  .card-badge { font-size: 12px; color: var(--text-muted); }
+  .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .card-next-step { font-size: 12px; margin-bottom: 10px; }
+  .card-next-step .label { color: var(--text-muted); font-weight: 500; }
+  .card-statuses { display: flex; flex-wrap: wrap; gap: 12px; }
+  .card-status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .card-status-item .phase-name {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  /* Card view: vertical layout when collapsed to prevent content hiding behind adjacent cards */
+  .site-card .card-statuses {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+  /* Card details row: appears in following row, spans full width, less shifting */
+  .card-details-row {
+    grid-column: 1 / -1;
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: -8px;
+    margin-bottom: 8px;
+  }
+  .card-details-row .expanded-content {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) minmax(300px, 2fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .card-details-row .quick-info {
+    grid-column: unset;
+    background: #f5f5f2;
+    border-radius: 6px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .card-details-row .expanded-sections {
+    grid-column: unset;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .col-status { min-width: 70px; }
+  .col-badge { min-width: 85px; }
+  .col-action { min-width: 100px; }
+
+  /* Checkbox */
+  input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <span class="logo">Onboarding Homebase</span>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Onboarding Homebase</h1>
+      <p>Track and manage onboarding progress across all your creator sites</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card todays-projects">
+      <div class="value">2</div>
+      <div class="label">Today's Projects</div>
+      </div>
+    <div class="stat-card needs-attention">
+      <div class="value">5</div>
+      <div class="label">Needs Attention</div>
+    </div>
+    <div class="stat-card done">
+      <div class="value">2</div>
+      <div class="label">Pending Install</div>
+    </div>
+    <div class="stat-card pending-2a">
+      <div class="value">6</div>
+      <div class="label">Pending 2a</div>
+    </div>
+  </div>
+
+  <!-- Filters Panel (Collapsible) -->
+  <div class="filters-wrapper collapsed" id="filtersWrapper">
+    <div class="filters-header" onclick="toggleFilters()">
+      <span class="filters-header-title">Filters</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="filters-panel" id="filtersPanel">
+      <button class="close-btn" onclick="toggleFilters()" title="Collapse filters">✕</button>
+
+    <!-- Row 1: Search (Site Name, URL, Creator Name), Site Status, Active Ad Network, Service Level, Owner -->
+    <div class="filter-row cols-5">
+      <div class="filter-group">
+        <label>Search</label>
+        <div class="input-wrap">
+          <input type="text" id="siteNameSearch" placeholder="Site name, URL, or creator..." oninput="filterTable()">
+          <button class="clear-btn" onclick="clearSearch()">✕</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Site Status</label>
+        <div class="select-wrap">
+          <select id="filterSiteStatus" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Setup</option>
+            <option>Install</option>
+            <option>Expired</option>
+            <option>Checkup</option>
+            <option>Active</option>
+            <option>Dropped</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Active Ad Network</label>
+        <div class="select-wrap">
+          <select id="filterAdNetwork" onchange="filterTable()">
+            <option value="">All</option>
+            <option>AdVally</option>
+            <option>Adsense</option>
+            <option>Ezoic</option>
+            <option>Freestar</option>
+            <option>I manage my own ad setup using one or more ad provider</option>
+            <option>Media.net</option>
+            <option>Mediavine</option>
+            <option>Mediavine - Journey</option>
+            <option>Monumetric</option>
+            <option>Newor</option>
+            <option>Other Ad Management Company</option>
+            <option>SHE Media</option>
+            <option>Sortable</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Service Level</label>
+        <div class="select-wrap">
+          <select id="filterServiceLevel" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Rise</option>
+            <option>Insider</option>
+            <option>Platinum</option>
+            <option>Platinum Elite</option>
+            <option>Luminary</option>
+            <option>Enterprise</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Owner</label>
+        <div class="select-wrap">
+          <select id="filterOwner" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Antoinette</option>
+            <option>Amy</option>
+            <option>Michelle</option>
+            <option>Whitney</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: 5 columns — Data Collection, GAM Account Status, Domain Status, ID Verification, Address Verification -->
+    <div class="filter-row cols-5">
+      <div class="filter-group">
+        <label>Data Collection</label>
+        <div class="select-wrap">
+          <select id="filterDataCollection" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Done</option>
+            <option>Needs Attention</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>GAM Account Status</label>
+        <div class="select-wrap">
+          <select id="filterGAM" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Invited</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>Inactive</option>
+            <option>Closed</option>
+            <option>Disapproved</option>
+            <option>Deactivated</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Domain Status</label>
+        <div class="select-wrap">
+          <select id="filterDomain" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Ads.txt not updated</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>Disapproved</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>ID Verification</label>
+        <div class="select-wrap">
+          <select id="filterIDVerification" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Pending</option>
+            <option>Expired</option>
+            <option>Verified</option>
+            <option>Exempt</option>
+            <option>Failed</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Address Verification</label>
+        <div class="select-wrap">
+          <select id="filterAddressVerification" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Pending</option>
+            <option>Expired</option>
+            <option>Verified</option>
+            <option>Exempt</option>
+            <option>Failed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Site Analysis, Site Setup, Identity Verification, Payment and Tax Info -->
+    <div class="filter-row cols-4">
+      <div class="filter-group">
+        <label>Site Analysis</label>
+        <div class="select-wrap">
+          <select id="filterSiteAnalysis" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Sent</option>
+            <option>Accepted</option>
+            <option>Needs Attention</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Site Setup</label>
+        <div class="select-wrap">
+          <select id="filterSiteSetup" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Done</option>
+            <option>Needs Attention</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Persona Verification</label>
+        <div class="select-wrap">
+          <select id="filterSetupIDVerification" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Approved</option>
+            <option>Needs Review</option>
+            <option>Open</option>
+            <option>Pre Approved</option>
+            <option>Pending</option>
+            <option>Error</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Payment and Tax Info</label>
+        <div class="select-wrap">
+          <select id="filterPaymentTax" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Pending</option>
+            <option>Done</option>
+            <option>Mismatch</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 4: Second Analysis, Dynamic Date filters -->
+    <div class="filter-row cols-4">
+      <div class="filter-group">
+        <label>Second Analysis</label>
+        <div class="select-wrap">
+          <select id="filterSecondAnalysis" onchange="filterTable()">
+            <option value="">All</option>
+            <option>Not Started</option>
+            <option>Requested CSVs</option>
+            <option>In Progress</option>
+            <option>Sent</option>
+            <option>Accepted</option>
+            <option>Needs Attention</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Start Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterStartDate" onchange="filterTable()">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Second Analysis Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterSecondAnalysisDate" onchange="filterTable()">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Install Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterInstallDate" onchange="filterTable()">
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row filter-presets">
+      <label>Presets</label>
+      <div class="preset-buttons">
+        <button type="button" class="btn-preset">GAM Issues</button>
+        <button type="button" class="btn-preset">New Sites/No Start Date</button>
+      </div>
+    </div>
+
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <h2>Site Progress Overview</h2>
+      <div class="toolbar-right">
+        <div class="toggle-group">
+          <button class="active" id="viewTable" onclick="setViewMode('table', this)">Table</button>
+          <button id="viewCard" onclick="setViewMode('card', this)">Card</button>
+        </div>
+        <div class="toggle-group">
+          <button class="active" onclick="setView('all', this)">All Sites</button>
+          <button onclick="setView('needs-attention', this)">Needs Attention Only</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end;">
+      <div class="bulk-bar">
+        <select class="bulk-select">
+          <option>Bulk Actions</option>
+          <option>Send follow up</option>
+          <option>Initial Analysis Acceptance</option>
+          <option>2nd Analysis Data Collection</option>
+        </select>
+        <button class="btn btn-complete" style="padding:6px 14px">Apply</button>
+      </div>
+    </div>
+
+    <div id="tableView">
+    <div class="table-scroll">
+    <!-- INTERNAL NOTE: Site Name will direct to future Onboarding page -->
+    <!-- INTERNAL NOTE: Add "Escalated to Creator Growth" on onboarding page - changes "CG involvement" field on lead to "Assisted" -->
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+          <th class="col-site sortable" data-sort="name">Site Name</th>
+          <th class="col-ad-network sortable" data-sort="adNetwork">Ad Network</th>
+          <th class="col-existing-creator">Multisite</th>
+          <th class="col-owner sortable" data-sort="owner">Owner</th>
+          <th class="col-progress">Progress</th>
+          <th class="col-badge sortable" data-sort="dcGeneral">Data Collection</th>
+          <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
+          <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
+          <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
+          <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="installDate">Install Date</option><option value="secondAnalysis">Second Analysis</option><option value="startDate">Start Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
+          <th class="col-badge">Zendesk Ticket</th>
+          <th class="col-badge sortable" data-sort="lastUpdated">Last Updated</th>
+          <th class="col-notes">Notes</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+    </table>
+    </div>
+    </div>
+
+    <div id="cardContainer" class="card-grid" style="display:none; padding: 16px;"></div>
+
+    <div class="table-footer">
+      <p><span id="footerCount">0 sites</span> displayed</p>
+      <div class="footer-actions"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const NOW = Date.now();
+const H = 3600000; // 1 hour in ms
+
+// Helper: ms ago
+function hoursAgo(h) { return NOW - h * H; }
+
+const SALESFORCE_LINK = 'https://cafemedia.lightning.force.com/lightning/r/MPM4_BASE__Milestone1_Project__c/a0zQQ000001vxcHYAQ/view';
+const OWNERS = ['Antoinette', 'Amy', 'Michelle', 'Whitney'];
+const SERVICE_LEVELS = ['Rise', 'Insider', 'Platinum', 'Platinum Elite', 'Luminary', 'Enterprise'];
+let dynamicDateType = 'installDate'; // 'installDate' | 'secondAnalysis' | 'startDate'
+let sortColumn = null;
+let sortAsc = true;
+const EXAMPLE_NOTES = ['Creator on vacation', 'Creator slow to respond', 'Waiting for docs', 'Follow up scheduled', null, null, null];
+
+const SITES = [
+  {
+    name: 'TechReview Central', url: 'techreviewcentral.com', progress: 100, overdue: null,
+    siteStatus: 'Active', adNetwork: 'Adsense', owner: 'Antoinette', installDate: '2025-01-15',
+    startDate: '2024-12-01', lastUpdated: '2025-01-20', notes: 'Creator on vacation',
+    creatorName: 'James Chen', existingCreator: false, serviceLevel: 'Platinum', multisiteCount: null, pageviews: 1250000, contract: 'in contract',
+    owiStartedAt: hoursAgo(72), analysisAcceptedAt: hoursAgo(72),
+    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved' },
+    siteAnalysis: { general: 'accepted' },
+    siteSetup: { comscore: 'done', installAccess: 'done', privacyPolicy: 'done', identityVerification: 'done', paymentTaxInfo: 'done', serviceAgreement: 'done' },
+    secondAnalysis: { state: 'accepted', stateStartedAt: hoursAgo(48) },
+    action: 'view'
+  },
+  {
+    name: 'LifestylePulse', url: 'lifestylepulse.com', progress: 100, overdue: null,
+    siteStatus: 'Active', adNetwork: 'Mediavine', owner: 'Amy', installDate: '2025-01-20',
+    startDate: '2024-12-15', lastUpdated: '2025-01-22', notes: 'Creator slow to respond',
+    creatorName: 'Sarah Mitchell', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: 2, pageviews: 2800000, contract: 'No contract',
+    owiStartedAt: hoursAgo(80), analysisAcceptedAt: hoursAgo(80),
+    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved' },
+    siteAnalysis: { general: 'accepted' },
+    siteSetup: { comscore: 'done', installAccess: 'done', privacyPolicy: 'done', identityVerification: 'done', paymentTaxInfo: 'done', serviceAgreement: 'done' },
+    secondAnalysis: { state: 'accepted', stateStartedAt: hoursAgo(60) },
+    action: 'view'
+  },
+  {
+    name: 'GreenWorld Blog', url: 'greenworldblog.org', progress: 75, overdue: null,
+    siteStatus: 'Install', adNetwork: 'Ezoic', owner: 'Amy', installDate: '2025-02-01',
+    startDate: '2024-12-15', lastUpdated: '2025-02-18', notes: null,
+    creatorName: 'Sarah Mitchell', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: 2, pageviews: 890000,
+    owiStartedAt: hoursAgo(30), analysisAcceptedAt: hoursAgo(72),
+    dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'done', payment: 'done', agreement: 'done' },
+    secondAnalysis: { state: 'in-progress', stateStartedAt: hoursAgo(10) },
+    action: 'continue'
+  },
+  {
+    name: 'FinanceHacks', url: 'financehacks.net', progress: 50, overdue: null,
+    siteStatus: 'Setup', adNetwork: 'Freestar', owner: 'Whitney', installDate: '2025-02-05',
+    startDate: '2025-01-15', lastUpdated: '2025-02-16', notes: 'Waiting for docs',
+    creatorName: 'Alex Rivera', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 450000, contract: 'in contract',
+    owiStartedAt: hoursAgo(20), analysisAcceptedAt: hoursAgo(20),
+    dataCollection: { gam: 'approved', domain: 'pending', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'done', payment: 'pending', agreement: 'not-started' },
+    secondAnalysis: { state: 'needs-accept', stateStartedAt: hoursAgo(18) }, // <24h → yellow
+    action: 'continue'
+  },
+  {
+    name: 'TravelDiaries', url: 'traveldiaries.co', progress: 50, overdue: '3 days overdue',
+    siteStatus: 'Setup', adNetwork: 'Monumetric', owner: 'Antoinette', installDate: '2025-02-10',
+    startDate: '2025-01-20', lastUpdated: '2025-02-20', notes: null,
+    creatorName: 'Emma Watson', existingCreator: false, serviceLevel: 'Rise', multisiteCount: null, pageviews: 320000,
+    owiStartedAt: hoursAgo(96), analysisAcceptedAt: hoursAgo(96),
+    dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'done', payment: 'pending', agreement: 'not-started' },
+    secondAnalysis: { state: 'needs-accept', stateStartedAt: hoursAgo(30) }, // >24h → red
+    action: 'complete'
+  },
+  {
+    name: 'CookingCorner', url: 'cookingcorner.io', progress: 50, overdue: '3 days overdue',
+    siteStatus: 'Setup', adNetwork: 'Media.net', owner: 'Amy', installDate: '2025-02-12',
+    startDate: '2025-01-25', lastUpdated: '2025-02-19', notes: 'Follow up scheduled',
+    creatorName: 'David Kim', existingCreator: false, serviceLevel: 'Platinum', multisiteCount: null, pageviews: 2100000,
+    owiStartedAt: hoursAgo(60), analysisAcceptedAt: hoursAgo(60),
+    dataCollection: { gam: 'pending', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'done', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'requested-csvs', stateStartedAt: hoursAgo(6) }, // <24h → yellow
+    action: 'complete'
+  },
+  {
+    name: 'SportsUncut', url: 'sportsuncut.com', progress: 50, overdue: '2 days overdue',
+    siteStatus: 'Setup', adNetwork: 'AdVally', owner: 'Michelle', installDate: '2025-02-15',
+    startDate: '2025-01-28', lastUpdated: '2025-02-21', notes: null,
+    creatorName: 'Mike Taylor', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 680000,
+    owiStartedAt: hoursAgo(55), analysisAcceptedAt: hoursAgo(55),
+    dataCollection: { gam: 'approved', domain: 'rejected' , identity:'pending', address:'pending'},
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'pending', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'requested-csvs', stateStartedAt: hoursAgo(28) }, // >24h → red
+    action: 'complete'
+  },
+  {
+    name: 'ParentingNow', url: 'parentingnow.com', progress: 50, overdue: '2 days overdue',
+    siteStatus: 'Checkup', adNetwork: 'SHE Media', owner: 'Whitney', installDate: '2025-02-18',
+    startDate: '2025-02-01', lastUpdated: '2025-02-22', notes: null,
+    creatorName: 'Lisa Park', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: null, pageviews: 1500000,
+    owiStartedAt: hoursAgo(52), analysisAcceptedAt: hoursAgo(52),
+    dataCollection: { gam: 'approved', domain: 'pending', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { verification: 'done', payment: 'pending', agreement: 'not-started' },
+    secondAnalysis: { state: 'in-progress', stateStartedAt: hoursAgo(5) }, // yellow
+    action: 'complete'
+  },
+  {
+    name: 'HealthFirst', url: 'healthfirst.blog', progress: 50, overdue: '2 days overdue',
+    siteStatus: 'Setup', adNetwork: 'Sortable', owner: 'Antoinette', installDate: '2025-02-20',
+    startDate: '2025-02-05', lastUpdated: '2025-02-23', notes: null,
+    creatorName: 'Rachel Green', existingCreator: false, serviceLevel: 'Rise', multisiteCount: null, pageviews: 180000, contract: 'No contract',
+    owiStartedAt: hoursAgo(49), analysisAcceptedAt: hoursAgo(49),
+    dataCollection: { gam: 'not-started', domain: 'not-started', identity:'not-started', address:'not-started' },
+    siteAnalysis: { general: 'Needs Attention' },
+    siteSetup: { verification: 'not-started', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'requested-csvs', stateStartedAt: hoursAgo(25) }, // >24h → red
+    action: 'complete'
+  },
+  {
+    name: 'MusicZone Daily', url: 'musiczonedaily.com', progress: 25, overdue: null,
+    siteStatus: 'Install', adNetwork: 'Newor', owner: 'Amy', installDate: '2025-02-22',
+    startDate: '2025-02-10', lastUpdated: '2025-02-24', notes: null,
+    creatorName: 'Chris Evans', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 520000,
+    owiStartedAt: hoursAgo(10), analysisAcceptedAt: null,
+    dataCollection: { gam: 'pending', domain: 'pending', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'in-progress' },
+    siteSetup: { verification: 'not-started', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'needs-accept', stateStartedAt: hoursAgo(26) }, // >24h → red
+    action: 'continue'
+  }
+];
+
+// Compute derived general statuses based on business rules
+function computeStatus(site) {
+  const owiElapsed = site.owiStartedAt ? (NOW - site.owiStartedAt) / H : null;
+ const analysisElapsed = site.analysisAcceptedAt
+    ? (NOW - site.analysisAcceptedAt) / H
+    : null;  
+
+  // Data Collection: Not Started / In Progress / Done / Needs Attention (>48h since OWI started)
+  let dcGeneral;
+  const dc = site.dataCollection || {};
+  const dcDone = dc.gam === 'approved' && dc.domain === 'approved' && dc.identity === 'approved' && dc.address === 'approved';
+  const dcNotStarted = ['gam','domain','identity','address'].every(k => {
+    const v = (dc[k] || '').replace(/-/g,' ').toLowerCase();
+    return !v || v === 'not started';
+  });
+  if (dcDone) {
+    dcGeneral = 'done';
+  } else if (dcNotStarted) {
+    dcGeneral = 'not-started';
+  } else if (owiElapsed !== null && owiElapsed > 48) {
+    dcGeneral = 'needs-attention';
+  } else {
+    dcGeneral = 'in-progress';
+  }
+
+
+  // Site Analysis (48h SLA from analysisAcceptedAt)
+
+  let saGeneral;
+
+  const saGen = site.siteAnalysis?.general;
+  if (saGen === 'accepted') {
+    saGeneral = 'accepted';
+  } else if (saGen === 'done') {
+    saGeneral = 'sent';
+  } else if (saGen === 'Needs Attention' || saGen === 'needs-attention') {
+    saGeneral = 'needs-attention';
+  } else if (!saGen || (saGen + '').replace(/-/g,' ').toLowerCase() === 'not started') {
+    saGeneral = 'not-started';
+  } else if (analysisElapsed !== null && analysisElapsed > 48) {
+    saGeneral = 'needs-attention';
+  } else {
+    saGeneral = 'in-progress';
+  }
+
+  // Site Setup: Not Started / In Progress / Done / Needs Attention (>48h since analysis accepted)
+  const ss = site.siteSetup || {};
+  const payment = ss.paymentTaxInfo || ss.payment;
+  const agreement = ss.serviceAgreement || ss.agreement;
+  const identityVer = ss.identityVerification || ss.verification;
+  const setupDone = identityVer === 'done' && payment === 'done' && agreement === 'done';
+  const ssNotStarted = [identityVer, payment, agreement].every(v => {
+    const x = (v || '').replace(/-/g,' ').toLowerCase();
+    return !x || x === 'not started';
+  });
+  let ssGeneral;
+  if (setupDone) {
+    ssGeneral = 'done';
+  } else if (ssNotStarted) {
+    ssGeneral = 'not-started';
+  } else if (analysisElapsed !== null && analysisElapsed > 48) {
+    ssGeneral = 'needs-attention';
+  } else {
+    ssGeneral = 'in-progress';
+  }
+
+  // Second Analysis: time-sensitive 4-state logic
+  // Requested CSVs → yellow, red after 24h
+  // In Progress    → blue always
+  // Needs to Accept → yellow, red after 24h
+  // Accepted       → green always
+  const sa2 = site.secondAnalysis;
+  const sa2Elapsed = sa2.stateStartedAt ? (NOW - sa2.stateStartedAt) / H : 0;
+  let sa2General;
+  if (sa2.state === 'accepted') {
+    sa2General = 'sa2-accepted';
+  } else if (sa2.state === 'in-progress') {
+    sa2General = 'sa2-in-progress';
+  } else if (sa2.state === 'requested-csvs') {
+    sa2General = sa2Elapsed > 24 ? 'sa2-requested-late' : 'sa2-requested';
+  } else if (sa2.state === 'needs-accept') {
+    sa2General = sa2Elapsed > 24 ? 'sa2-needs-accept-late' : 'sa2-needs-accept';
+  } else {
+    sa2General = 'not-started';
+  }
+
+  return { dcGeneral, saGeneral, ssGeneral, sa2General };
+}
+
+let currentView = 'all';
+let expandedRows = new Set();
+let expandedCardSite = null;
+
+function badgeHtml(status) {
+  const map = {
+    'done':                  ['done',                 'Done'],
+    'sent':                  ['done',                 'Sent'],
+    'in-progress':           ['in-progress',          'In Progress'],
+    'needs-attention':       ['needs-attention',       'Needs Attention'],
+    'accepted':              ['accepted',              'Accepted'],
+    'requested-csvs':        ['requested',             'Requested CSVs'],
+    'waiting':               ['not-started',           'Waiting'],
+    'approved':              ['approved',              'Approved'],
+    'pending':               ['pending',               'Pending'],
+    'rejected':              ['rejected',              'Rejected'],
+    'disapproved':           ['rejected',              'Disapproved'],
+    'failed':                ['rejected',              'Failed'],
+    'closed':                ['not-started',           'Closed'],
+    'deactivated':           ['not-started',           'Deactivated'],
+    'not-started':           ['not-started',           'Not Started'],
+    'mismatch':              ['needs-attention',       'Mismatch'],
+    'needs-review':          ['waiting',               'Needs Review'],
+    'open':                  ['active',               'Open'],
+    'pre-approved':          ['approved',              'Pre Approved'],
+    'error':                 ['needs-attention',       'Error'],
+    'active':                ['in-progress',           'In Progress'],
+    // Second Analysis computed statuses
+    'sa2-accepted':          ['accepted',              'Accepted'],
+    'sa2-in-progress':       ['sa2-in-progress',       'In Progress'],
+    'sa2-requested':         ['sa2-requested',         'Requested CSVs'],
+    'sa2-requested-late':    ['sa2-requested-late',    'Requested CSVs'],
+    'sa2-needs-accept':      ['sa2-needs-accept',      'Sent'],
+    'sa2-needs-accept-late': ['sa2-needs-accept-late', 'Sent'],
+  };
+  const [cls, label] = map[status] || ['not-started', status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function actionBtn(type) {
+  if (type === 'view') return `<button class="btn btn-view">View</button>`;
+  if (type === 'continue') return `<button class="btn btn-continue">Continue</button>`;
+  if (type === 'complete') return `<button class="btn btn-complete">Complete Now</button>`;
+  return '';
+}
+
+function progressClass(pct) {
+  if (pct >= 75) return 'high';
+  if (pct >= 50) return 'mid';
+  return 'low';
+}
+
+function overdueHtml(site) {
+  if (!site.overdue) return '';
+  const cls = site.overdue === 'Today' ? 'today' : 'overdue';
+  return `<br><span class="${cls}">${site.overdue}</span>`;
+}
+
+function expandedContentHtml(site) {
+  const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
+  const dc = site.dataCollection || {};
+  const ss = site.siteSetup || {};
+  const existingMark = site.existingCreator ? '✓ Yes' : 'No';
+  return `
+    <div class="quick-info">
+      <h4>Quick Info</h4>
+      <div class="quick-info-row"><span class="label">Creator Name</span><span class="value">${site.creatorName || '—'}</span></div>
+      <div class="quick-info-row"><span class="label">Site URL</span><span class="value"><a href="#" target="_blank">${site.url || '—'}</a></span></div>
+      <div class="quick-info-row"><span class="label">Existing Creator</span><span class="value">${existingMark}</span></div>
+      <div class="quick-info-row"><span class="label">Service Level</span><span class="value">${site.serviceLevel || '—'}</span></div>
+      <div class="quick-info-row"><span class="label">Monthly Pageviews</span><span class="value">${site.pageviews != null ? site.pageviews.toLocaleString() : '—'}</span></div>
+      <div class="quick-info-row"><span class="label">Contract</span><span class="value">${site.contract === 'in contract' ? 'In contract' : (site.contract === 'No contract' ? 'No contract' : '—')}</span></div>
+      <div class="quick-info-row"><span class="label">Salesforce</span><span class="value"><a href="${SALESFORCE_LINK}" target="_blank">Project Link</a></span></div>
+      <div class="quick-info-row"><span class="label">Application</span><span class="value"><a href="https://admin.raptive.com/applications" target="_blank">Link</a></span></div>
+      <div class="quick-info-row quick-info-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" class="escalated-toggle" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${site.escalatedToCreatorGrowth ? 'checked' : ''} onchange="updateEscalatedToCreatorGrowth(this.dataset.siteName, this.checked)" onclick="event.stopPropagation()">
+          <span>Escalated to Creator Growth</span>
+        </label>
+      </div>
+    </div>
+    <div class="expanded-sections">
+      <div class="expanded-section">
+        <h4>Data Collection ${badgeHtml(dcGeneral)}</h4>
+        <div class="sub-status-row"><span class="sub-label">Google Analytics</span>${badgeHtml(dc.googleAnalytics || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">GAM Account</span>${badgeHtml(dc.gam || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Domain</span>${badgeHtml(dc.domain || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Identity Verification</span>${badgeHtml(dc.identity || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Address Verification</span>${badgeHtml(dc.address || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Ad Performance</span>${badgeHtml(dc.adPerformance || 'not-started')}</div>
+      </div>
+      <div class="expanded-section">
+        <h4>Site Analysis ${badgeHtml(saGeneral)}</h4>
+      </div>
+      <div class="expanded-section">
+        <h4>Site Setup ${badgeHtml(ssGeneral)}</h4>
+        <div class="sub-status-row"><span class="sub-label">Comscore</span>${badgeHtml(ss.comscore || ss.verification || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Install Access</span>${badgeHtml(ss.installAccess || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Privacy Policy</span>${badgeHtml(ss.privacyPolicy || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Persona Verification</span>${badgeHtml(ss.identityVerification || ss.verification || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Payment and Tax Info</span>${badgeHtml(ss.paymentTaxInfo || ss.payment || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Service Agreement</span>${badgeHtml(ss.serviceAgreement || ss.agreement || 'not-started')}</div>
+      </div>
+      <div class="expanded-section">
+        <h4>Second Analysis ${badgeHtml(sa2General)}</h4>
+      </div>
+    </div>`;
+}
+
+function expandedHtml(site) {
+  return `
+    <tr class="expanded-row" id="exp-${site.name.replace(/\s/g,'_')}">
+      <td colspan="14">
+        <div class="expanded-content">${expandedContentHtml(site)}</div>
+      </td>
+    </tr>`;
+}
+
+function toggleRow(name, evt) {
+  if (evt) evt.stopPropagation();
+  const key = name.replace(/\s/g,'_');
+  const expRow = document.getElementById('exp-' + key);
+  const btn = document.getElementById('btn-' + key);
+  if (expandedRows.has(key)) {
+    expandedRows.delete(key);
+    if (expRow) expRow.remove();
+    if (btn) btn.classList.remove('open');
+  } else {
+    expandedRows.add(key);
+    if (btn) {
+      btn.classList.add('open');
+      const mainRow = btn.closest('tr');
+      mainRow.insertAdjacentHTML('afterend', expandedHtml(SITES.find(s=>s.name===name)));
+    }
+  }
+}
+
+function onRowClick(evt, name) {
+  if (evt.target.closest('input[type=checkbox]') || evt.target.closest('input[type=date]') || evt.target.closest('input[type=text]') || evt.target.closest('a') || evt.target.closest('select') || evt.target.closest('button')) return;
+  toggleRow(name);
+}
+
+function getDynamicDateValue(site) {
+  if (dynamicDateType === 'installDate') return site.installDate || '';
+  if (dynamicDateType === 'startDate') return site.startDate || '';
+  if (dynamicDateType === 'secondAnalysis' && site.secondAnalysis?.stateStartedAt) {
+    const d = new Date(site.secondAnalysis.stateStartedAt);
+    return d.toISOString().slice(0,10);
+  }
+  return '';
+}
+
+function renderTable(sites) {
+  const tbody = document.getElementById('tableBody');
+  const cardContainer = document.getElementById('cardContainer');
+  const tableView = document.getElementById('tableView');
+  tbody.innerHTML = '';
+  if (cardContainer) cardContainer.innerHTML = '';
+  expandedRows.clear();
+
+  const viewMode = document.getElementById('viewTable')?.classList.contains('active') ? 'table' : 'card';
+  if (tableView) tableView.style.display = viewMode === 'table' ? '' : 'none';
+  if (cardContainer) cardContainer.style.display = viewMode === 'card' ? '' : 'none';
+  if (viewMode === 'table') expandedCardSite = null;
+
+  sites.forEach(site => {
+    const key = site.name.replace(/\s/g,'_');
+    const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
+    const ownerVal = site.owner || '';
+    const ownerOptions = '<option value="">—</option>' + OWNERS.map(o => `<option value="${o}" ${o === ownerVal ? 'selected' : ''}>${o}</option>`).join('');
+    const dynamicDateVal = getDynamicDateValue(site);
+    const multisiteVal = site.multisiteCount ? String(site.multisiteCount) : '';
+    const nextStep = getNextStep(site, dcGeneral, saGeneral, ssGeneral, sa2General);
+
+    const tr = document.createElement('tr');
+    tr.className = 'main-row';
+    tr.onclick = (evt) => onRowClick(evt, site.name);
+    tr.dataset.name = site.name.toLowerCase();
+    tr.dataset.siteStatus = site.siteStatus;
+    tr.dataset.adNetwork = site.adNetwork;
+    tr.dataset.urgent = (site.action === 'complete') ? '1' : '0';
+
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-check"></td>
+      <td class="site-name-cell">
+        <button class="expand-btn" id="btn-${key}" onclick="toggleRow('${site.name}', event)">▶</button>
+        <a href="#">${site.name}</a>
+        ${overdueHtml(site)}
+      </td>
+      <td>${site.adNetwork || '—'}</td>
+      <td class="col-existing-creator">${multisiteVal || '—'}</td>
+      <td class="col-owner"><select class="owner-select" onchange="updateOwner('${site.name}', this.value)" onclick="event.stopPropagation()">${ownerOptions}</select></td>
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill ${progressClass(site.progress)}" style="width:${site.progress}%"></div></div>
+          <span class="progress-pct">${site.progress}%</span>
+        </div>
+      </td>
+      <td>${badgeHtml(dcGeneral)}</td>
+      <td>${badgeHtml(saGeneral)}</td>
+      <td>${badgeHtml(ssGeneral)}</td>
+      <td>${badgeHtml(sa2General)}</td>
+      <td><input type="date" class="install-date-input" value="${dynamicDateVal}" onchange="updateDynamicDate('${site.name}', this.value)" onclick="event.stopPropagation()"></td>
+      <td><a href="https://raptive.zendesk.com/agent/home/tickets" target="_blank" class="btn-link-zen">&#128172; Ticket</a></td>
+      <td>${site.lastUpdated || '—'}</td>
+      <td><input type="text" class="notes-input" placeholder="Add note..." value="${(site.notes || '').replace(/"/g,'&quot;')}" title="${(site.notes || 'Click to add note').replace(/"/g,'&quot;')}" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onchange="updateNotes(this.dataset.siteName, this.value)" onblur="updateNotes(this.dataset.siteName, this.value)" onclick="event.stopPropagation()"></td>`;
+
+    tbody.appendChild(tr);
+
+    if (cardContainer && viewMode === 'card') {
+      const card = document.createElement('div');
+      card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '');
+      card.dataset.siteName = site.name;
+      card.onclick = () => {
+        expandedCardSite = expandedCardSite === site.name ? null : site.name;
+        filterTable();
+      };
+      const dc = site.dataCollection || {};
+      const ss = site.siteSetup || {};
+      card.innerHTML = `
+        <div class="card-header">
+          <strong>${site.name}</strong>
+          <span class="card-badge">${site.progress}%</span>
+        </div>
+        <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
+        <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
+        <div class="card-statuses">
+          <div class="card-status-item">
+            <span class="phase-name">Data Collection</span>
+            <span>${badgeHtml(dcGeneral)}</span>
+          </div>
+          <div class="card-status-item">
+            <span class="phase-name">Site Analysis</span>
+            <span>${badgeHtml(saGeneral)}</span>
+          </div>
+          <div class="card-status-item">
+            <span class="phase-name">Site Setup</span>
+            <span>${badgeHtml(ssGeneral)}</span>
+          </div>
+          <div class="card-status-item">
+            <span class="phase-name">Second Analysis</span>
+            <span>${badgeHtml(sa2General)}</span>
+          </div>
+        </div>
+      `;
+      cardContainer.appendChild(card);
+      if (expandedCardSite === site.name) {
+        const detailsRow = document.createElement('div');
+        detailsRow.className = 'card-details-row';
+        detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
+        cardContainer.appendChild(detailsRow);
+      }
+    }
+  });
+
+  document.getElementById('footerCount').textContent = `${sites.length} site${sites.length !== 1 ? 's' : ''} displayed`;
+  if (document.querySelector('.date-type-select')) document.querySelector('.date-type-select').value = dynamicDateType;
+}
+
+function getNextStep(site, dc, sa, ss, sa2) {
+  const dcSteps = [
+    { key: 'googleAnalytics', label: 'Google Analytics' },
+    { key: 'gam', label: 'GAM Account' },
+    { key: 'domain', label: 'Domain' },
+    { key: 'identity', label: 'Identity Verification' },
+    { key: 'address', label: 'Address Verification' },
+    { key: 'adPerformance', label: 'Ad Performance' }
+  ];
+  const ssSteps = [
+    { key: 'comscore', fallback: 'verification', label: 'Comscore' },
+    { key: 'installAccess', label: 'Install Access' },
+    { key: 'privacyPolicy', label: 'Privacy Policy' },
+    { key: 'identityVerification', fallback: 'verification', label: 'Persona Verification' },
+    { key: 'paymentTaxInfo', fallback: 'payment', label: 'Payment and Tax Info' },
+    { key: 'serviceAgreement', fallback: 'agreement', label: 'Service Agreement' }
+  ];
+
+  if (dc !== 'done') {
+    const d = site.dataCollection || {};
+    for (const s of dcSteps) {
+      const val = d[s.key] || '';
+      if (val !== 'approved' && val !== 'done') return s.label;
+    }
+  }
+  if (sa !== 'accepted' && sa !== 'sent') return 'Site Analysis';
+  if (ss !== 'done') {
+    const st = site.siteSetup || {};
+    for (const s of ssSteps) {
+      const val = st[s.key] || st[s.fallback] || '';
+      if (val !== 'done' && val !== 'approved') return s.label;
+    }
+  }
+  if (sa2 !== 'sa2-accepted') return 'Second Analysis';
+  return 'Done';
+}
+
+function updateDynamicDate(siteName, val) {
+  const site = SITES.find(s => s.name === siteName);
+  if (!site) return;
+  if (dynamicDateType === 'installDate') site.installDate = val || null;
+  else if (dynamicDateType === 'startDate') site.startDate = val || null;
+  else if (dynamicDateType === 'secondAnalysis' && site.secondAnalysis) {
+    site.secondAnalysis.stateStartedAt = val ? new Date(val).getTime() : null;
+  }
+  site.lastUpdated = new Date().toISOString().slice(0,10);
+  filterTable();
+}
+
+function setDynamicDateType(type) {
+  dynamicDateType = type;
+  filterTable();
+}
+
+function setViewMode(mode, btn) {
+  if (btn) btn.closest('.toggle-group').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTable();
+}
+
+function filterTable() {
+  const search = document.getElementById('siteNameSearch').value.toLowerCase();
+  const siteStatus = document.getElementById('filterSiteStatus').value;
+  const gam = document.getElementById('filterGAM').value;
+  const domain = document.getElementById('filterDomain').value;
+  const idVerification = document.getElementById('filterIDVerification').value;
+  const addressVerification = document.getElementById('filterAddressVerification').value;
+  const dataCollection = document.getElementById('filterDataCollection').value;
+  const adNetwork = document.getElementById('filterAdNetwork').value;
+  const siteAnalysis = document.getElementById('filterSiteAnalysis').value;
+  const siteSetup = document.getElementById('filterSiteSetup').value;
+  const secondAnalysis = document.getElementById('filterSecondAnalysis').value;
+  const setupIDVerification = document.getElementById('filterSetupIDVerification').value;
+  const paymentTax = document.getElementById('filterPaymentTax').value;
+  const serviceLevel = document.getElementById('filterServiceLevel').value;
+
+  const filtered = SITES.filter(s => {
+    if (search) {
+      const q = search.trim();
+      const matchName = s.name.toLowerCase().includes(q);
+      const matchUrl = (s.url || '').toLowerCase().includes(q);
+      const matchCreator = (s.creatorName || '').toLowerCase().includes(q);
+      if (!matchName && !matchUrl && !matchCreator) return false;
+    }
+    if (siteStatus && s.siteStatus !== siteStatus) return false;
+    const dc = s.dataCollection || {};
+    const gamVal = (dc.gam || 'not-started').replace(/-/g,' ').toLowerCase();
+    const domainVal = (dc.domain || 'not-started').replace(/-/g,' ').toLowerCase();
+    const identityVal = (dc.identity || 'not-started').replace(/-/g,' ').toLowerCase();
+    const addressVal = (dc.address || 'not-started').replace(/-/g,' ').toLowerCase();
+    if (gam && gamVal !== gam.toLowerCase()) return false;
+    if (domain && domainVal !== domain.toLowerCase()) return false;
+    if (idVerification && identityVal !== idVerification.toLowerCase()) return false;
+    if (addressVerification && addressVal !== addressVerification.toLowerCase()) return false;
+    if (adNetwork && s.adNetwork !== adNetwork) return false;
+    if (currentView === 'needs-attention' && s.action !== 'complete') return false;
+    if (dataCollection) {
+      const { dcGeneral } = computeStatus(s);
+      const dcMap = { 'Not Started': 'not-started', 'In Progress': 'in-progress', 'Done': 'done', 'Needs Attention': 'needs-attention' };
+      if (dcMap[dataCollection] && dcGeneral !== dcMap[dataCollection]) return false;
+    }
+    if (siteAnalysis) {
+      const { saGeneral } = computeStatus(s);
+      if (siteAnalysis === 'Not Started' && saGeneral !== 'not-started') return false;
+      if (siteAnalysis === 'Sent' && saGeneral !== 'sent') return false;
+      if (siteAnalysis === 'In Progress' && saGeneral !== 'in-progress') return false;
+      if (siteAnalysis === 'Accepted' && saGeneral !== 'accepted') return false;
+      if (siteAnalysis === 'Needs Attention' && saGeneral !== 'needs-attention') return false;
+    }
+    if (siteSetup) {
+      const { ssGeneral } = computeStatus(s);
+      const ssMap = { 'Not Started': 'not-started', 'In Progress': 'in-progress', 'Done': 'done', 'Needs Attention': 'needs-attention' };
+      if (ssMap[siteSetup] && ssGeneral !== ssMap[siteSetup]) return false;
+    }
+    if (secondAnalysis) {
+      const { sa2General } = computeStatus(s);
+      if (secondAnalysis === 'Not Started' && sa2General !== 'not-started') return false;
+      if (secondAnalysis === 'Sent' && sa2General !== 'sa2-needs-accept' && sa2General !== 'sa2-needs-accept-late') return false;
+      if (secondAnalysis === 'Requested CSVs' && sa2General !== 'sa2-requested' && sa2General !== 'sa2-requested-late') return false;
+      if (secondAnalysis === 'In Progress' && sa2General !== 'sa2-in-progress') return false;
+      if (secondAnalysis === 'Accepted' && sa2General !== 'sa2-accepted') return false;
+      if (secondAnalysis === 'Needs Attention' && sa2General !== 'sa2-requested-late' && sa2General !== 'sa2-needs-accept-late') return false;
+    }
+    const installDateFilter = document.getElementById('filterInstallDate')?.value;
+    const secondAnalysisDateFilter = document.getElementById('filterSecondAnalysisDate')?.value;
+    const startDateFilter = document.getElementById('filterStartDate')?.value;
+    if (installDateFilter && (s.installDate || '') !== installDateFilter) return false;
+    if (secondAnalysisDateFilter) {
+      const sa2Date = s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '';
+      if (sa2Date !== secondAnalysisDateFilter) return false;
+    }
+    if (startDateFilter && (s.startDate || '') !== startDateFilter) return false;
+    if (setupIDVerification) {
+      const ss = s.siteSetup || {};
+      let idVer = (ss.identityVerification || ss.verification || '').replace(/-/g,' ').toLowerCase();
+      if (idVer === 'done') idVer = 'approved';
+      const filterVal = setupIDVerification.replace(/-/g,' ').toLowerCase();
+      if (idVer !== filterVal) return false;
+    }
+    if (paymentTax) {
+      const ss = s.siteSetup || {};
+      const pt = (ss.paymentTaxInfo || ss.payment || '').replace(/-/g,' ');
+      if (pt.toLowerCase() !== paymentTax.replace(/-/g,' ').toLowerCase()) return false;
+    }
+    if (serviceLevel && (s.serviceLevel || '') !== serviceLevel) return false;
+    const ownerFilter = document.getElementById('filterOwner');
+    if (ownerFilter && ownerFilter.value && (s.owner || '') !== ownerFilter.value) return false;
+    return true;
+  });
+
+  let result = filtered;
+  if (sortColumn) {
+    result = [...result].sort((a, b) => {
+      const av = getSortValue(a, sortColumn);
+      const bv = getSortValue(b, sortColumn);
+      const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
+      return sortAsc ? cmp : -cmp;
+    });
+  }
+  renderTable(result);
+}
+
+function getSortValue(site, col) {
+  if (col === 'name') return (site.name || '').toLowerCase();
+  if (col === 'adNetwork') return (site.adNetwork || '').toLowerCase();
+  if (col === 'owner') return (site.owner || '').toLowerCase();
+  if (col === 'lastUpdated') return site.lastUpdated || '';
+  if (col === 'dynamicDate') return getDynamicDateValue(site) || '';
+  const st = computeStatus(site);
+  if (col === 'dcGeneral') return st.dcGeneral;
+  if (col === 'saGeneral') return st.saGeneral;
+  if (col === 'ssGeneral') return st.ssGeneral;
+  if (col === 'sa2General') return st.sa2General;
+  return '';
+}
+
+function sortByColumn(col) {
+  if (sortColumn === col) sortAsc = !sortAsc;
+  else { sortColumn = col; sortAsc = true; }
+  filterTable();
+}
+
+function setView(view, btn) {
+  currentView = view;
+  if (btn) btn.closest('.toggle-group').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTable();
+}
+
+function toggleFilters() {
+  const wrapper = document.getElementById('filtersWrapper');
+  wrapper.classList.toggle('collapsed');
+}
+
+function clearSearch() {
+  document.getElementById('siteNameSearch').value = '';
+  filterTable();
+}
+
+function toggleAll(el) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = el.checked);
+}
+
+function updateOwner(siteName, owner) {
+  const site = SITES.find(s => s.name === siteName);
+  if (site) site.owner = owner || null;
+}
+
+function updateInstallDate(siteName, date) {
+  const site = SITES.find(s => s.name === siteName);
+  if (site) site.installDate = date || null;
+}
+
+function updateNotes(siteName, note) {
+  const site = SITES.find(s => s.name === siteName);
+  if (site) site.notes = (note || '').trim() || null;
+}
+
+function updateEscalatedToCreatorGrowth(siteName, checked) {
+  const site = SITES.find(s => s.name === siteName);
+  if (site) site.escalatedToCreatorGrowth = !!checked;
+}
+
+// Init
+document.querySelectorAll('th.sortable').forEach(th => {
+  th.addEventListener('click', () => sortByColumn(th.dataset.sort));
+});
+filterTable();
+</script>
+</body>
+</html>
