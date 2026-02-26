@@ -765,31 +765,22 @@
   }
   .site-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   .site-card.expanded { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-  .multisite-card-group {
-    grid-column: 1 / -1;
+  .site-card.multisite-group {
     border-left: 4px solid var(--blue);
-    background: linear-gradient(to right, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
-    border-radius: 8px;
-    padding: 12px 12px 12px 16px;
-    margin-bottom: 8px;
-  }
-  .multisite-card-group-label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--blue);
-    margin-bottom: 10px;
-  }
-  .multisite-card-group .multisite-card-inner {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
   }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .card-header strong { font-size: 14px; }
   .card-badge { font-size: 12px; color: var(--text-muted); }
-  .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .card-dates {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .card-dates .date-line { display: block; }
   .card-next-step { font-size: 12px; margin-bottom: 10px; }
   .card-next-step .label { color: var(--text-muted); font-weight: 500; }
   .card-statuses { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -1217,6 +1208,17 @@ const H = 3600000; // 1 hour in ms
 // Helper: ms ago
 function hoursAgo(h) { return NOW - h * H; }
 
+// Format date as MM/DD/YYYY
+function formatDateMdY(val) {
+  if (!val) return '—';
+  const d = typeof val === 'number' ? new Date(val) : new Date(String(val));
+  if (isNaN(d.getTime())) return val;
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const y = d.getFullYear();
+  return `${m}/${day}/${y}`;
+}
+
 const SALESFORCE_LINK = 'https://cafemedia.lightning.force.com/lightning/r/MPM4_BASE__Milestone1_Project__c/a0zQQ000001vxcHYAQ/view';
 const OWNERS = ['Antoinette', 'Amy', 'Michelle', 'Whitney'];
 const SERVICE_LEVELS = ['Rise', 'Insider', 'Platinum', 'Platinum Elite', 'Luminary', 'Enterprise'];
@@ -1604,7 +1606,6 @@ function renderTable(sites) {
   if (cardContainer) cardContainer.style.display = viewMode === 'card' ? '' : 'none';
   if (viewMode === 'table') expandedCardSite = null;
 
-  let cardIndex = 0;
   sites.forEach(site => {
     const key = site.name.replace(/\s/g,'_');
     const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
@@ -1649,71 +1650,30 @@ function renderTable(sites) {
     tbody.appendChild(tr);
 
     if (cardContainer && viewMode === 'card') {
-      if (site.multisiteCount > 1) {
-        const prevCreator = cardIndex > 0 ? sites[cardIndex - 1].creatorName : null;
-        const isFirstInGroup = site.creatorName !== prevCreator;
-        if (isFirstInGroup) {
-          const groupSites = sites.filter(s => s.creatorName === site.creatorName && s.multisiteCount > 1);
-          const groupDiv = document.createElement('div');
-          groupDiv.className = 'multisite-card-group';
-          const label = document.createElement('div');
-          label.className = 'multisite-card-group-label';
-          label.textContent = `${site.creatorName || 'Creator'} · ${groupSites.length} site${groupSites.length !== 1 ? 's' : ''}`;
-          groupDiv.appendChild(label);
-          const innerDiv = document.createElement('div');
-          innerDiv.className = 'multisite-card-inner';
-          groupSites.forEach(s => {
-            const { dcG, saG, ssG, sa2G } = computeStatus(s);
-            const nxt = getNextStep(s, dcG, saG, ssG, sa2G);
-            const card = document.createElement('div');
-            card.className = 'site-card' + (expandedCardSite === s.name ? ' expanded' : '');
-            card.dataset.siteName = s.name;
-            card.onclick = () => { expandedCardSite = expandedCardSite === s.name ? null : s.name; filterTable(); };
-            card.innerHTML = `
-              <div class="card-header"><strong>${s.name}</strong><span class="card-badge">${s.progress}%</span></div>
-              <div class="card-meta">${s.creatorName || '—'} · ${s.adNetwork || '—'}</div>
-              <div class="card-next-step"><span class="label">Next:</span> ${nxt}</div>
-              <div class="card-statuses">
-                <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcG)}</span></div>
-                <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saG)}</span></div>
-                <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssG)}</span></div>
-                <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2G)}</span></div>
-              </div>`;
-            innerDiv.appendChild(card);
-            if (expandedCardSite === s.name) {
-              const dr = document.createElement('div');
-              dr.className = 'card-details-row';
-              dr.innerHTML = `<div class="expanded-content">${expandedContentHtml(s)}</div>`;
-              innerDiv.appendChild(dr);
-            }
-          });
-          groupDiv.appendChild(innerDiv);
-          cardContainer.appendChild(groupDiv);
-        }
-      } else {
-        const card = document.createElement('div');
-        card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '');
-        card.dataset.siteName = site.name;
-        card.onclick = () => { expandedCardSite = expandedCardSite === site.name ? null : site.name; filterTable(); };
-        card.innerHTML = `
-          <div class="card-header"><strong>${site.name}</strong><span class="card-badge">${site.progress}%</span></div>
-          <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
-          <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
-          <div class="card-statuses">
-            <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcGeneral)}</span></div>
-            <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saGeneral)}</span></div>
-            <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssGeneral)}</span></div>
-            <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2General)}</span></div>
-          </div>`;
-        cardContainer.appendChild(card);
-        if (expandedCardSite === site.name) {
-          const detailsRow = document.createElement('div');
-          detailsRow.className = 'card-details-row';
-          detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
-          cardContainer.appendChild(detailsRow);
-        }
+      const card = document.createElement('div');
+      card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '') + (site.multisiteCount > 1 ? ' multisite-group' : '');
+      card.dataset.siteName = site.name;
+      card.onclick = () => { expandedCardSite = expandedCardSite === site.name ? null : site.name; filterTable(); };
+      const schedInstall = formatDateMdY(site.scheduledInstallDate || site.installDate);
+      const lastUpd = formatDateMdY(site.lastUpdated);
+      card.innerHTML = `
+        <div class="card-header"><strong>${site.name}</strong><span class="card-badge">${site.progress}%</span></div>
+        <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
+        <div class="card-dates"><span class="date-line">Last Updated: ${lastUpd}</span><span class="date-line">Scheduled Install Date: ${schedInstall}</span></div>
+        <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
+        <div class="card-statuses">
+          <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcGeneral)}</span></div>
+          <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saGeneral)}</span></div>
+          <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssGeneral)}</span></div>
+          <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2General)}</span></div>
+        </div>`;
+      cardContainer.appendChild(card);
+      if (expandedCardSite === site.name) {
+        const detailsRow = document.createElement('div');
+        detailsRow.className = 'card-details-row';
+        detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
+        cardContainer.appendChild(detailsRow);
       }
-      cardIndex++;
     }
   });
 
