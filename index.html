@@ -1104,9 +1104,21 @@
         </div>
       </div>
       <div class="filter-group">
-        <label>Start Date</label>
+        <label>Actual Start Date</label>
         <div class="input-wrap">
-          <input type="date" id="filterStartDate" onchange="filterTable()">
+          <input type="date" id="filterActualStartDate" onchange="filterTable()">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Expected Install Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterExpectedInstallDate" onchange="filterTable()">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Scheduled Install Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterScheduledInstallDate" onchange="filterTable()">
         </div>
       </div>
       <div class="filter-group">
@@ -1115,19 +1127,15 @@
           <input type="date" id="filterSecondAnalysisDate" onchange="filterTable()">
         </div>
       </div>
-      <div class="filter-group">
-        <label>Install Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterInstallDate" onchange="filterTable()">
-        </div>
-      </div>
     </div>
 
     <div class="filter-row filter-presets">
       <label>Presets</label>
       <div class="preset-buttons">
         <button type="button" class="btn-preset">GAM Issues</button>
-        <button type="button" class="btn-preset">New Sites/No Start Date</button>
+        <button type="button" class="btn-preset">Pre-schedule</button>
+        <button type="button" class="btn-preset">Priority Onboards</button>
+        <button type="button" class="btn-preset">Remaining Month Install Forecast</button>
       </div>
     </div>
 
@@ -1805,15 +1813,17 @@ function filterTable() {
       if (secondAnalysis === 'Accepted' && sa2General !== 'sa2-accepted') return false;
       if (secondAnalysis === 'Needs Attention' && sa2General !== 'sa2-requested-late' && sa2General !== 'sa2-needs-accept-late') return false;
     }
-    const installDateFilter = document.getElementById('filterInstallDate')?.value;
+    const actualStartDateFilter = document.getElementById('filterActualStartDate')?.value;
+    const expectedInstallDateFilter = document.getElementById('filterExpectedInstallDate')?.value;
+    const scheduledInstallDateFilter = document.getElementById('filterScheduledInstallDate')?.value;
     const secondAnalysisDateFilter = document.getElementById('filterSecondAnalysisDate')?.value;
-    const startDateFilter = document.getElementById('filterStartDate')?.value;
-    if (installDateFilter && (s.installDate || '') !== installDateFilter) return false;
+    if (actualStartDateFilter && (s.startDate || '') !== actualStartDateFilter) return false;
+    if (expectedInstallDateFilter && ((s.expectedInstallDate || s.installDate) || '') !== expectedInstallDateFilter) return false;
+    if (scheduledInstallDateFilter && ((s.scheduledInstallDate || s.installDate) || '') !== scheduledInstallDateFilter) return false;
     if (secondAnalysisDateFilter) {
       const sa2Date = s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '';
       if (sa2Date !== secondAnalysisDateFilter) return false;
     }
-    if (startDateFilter && (s.startDate || '') !== startDateFilter) return false;
     if (setupIDVerification) {
       const ss = s.siteSetup || {};
       let idVer = (ss.identityVerification || ss.verification || '').replace(/-/g,' ').toLowerCase();
