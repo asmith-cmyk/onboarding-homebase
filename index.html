@@ -283,8 +283,8 @@
     overflow: hidden;
   }
   .table-scroll {
-    overflow-x: auto;
-    overflow-y: visible;
+    overflow: auto;
+    max-height: calc(100vh - 340px);
   }
   .table-toolbar {
     display: flex;
@@ -328,6 +328,9 @@
     border-collapse: collapse;
   }
   thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     background: #1c3d2e;
     color: rgba(255,255,255,0.85);
     font-size: 11px;
@@ -404,9 +407,6 @@
     min-width: 30px;
   }
 
-  /* OVERDUE TEXT */
-  .overdue { color: var(--red); font-size: 11px; font-weight: 500; }
-  .today { color: var(--amber); font-size: 11px; font-weight: 500; }
 
   /* STATUS BADGES */
   .badge {
@@ -484,6 +484,13 @@
     font-weight: 600;
     margin-bottom: 10px;
   }
+  .quick-info-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+  }
+  .quick-info-col .quick-info-row { margin-bottom: 8px; }
+  .quick-info-col .quick-info-row:last-child { margin-bottom: 0; }
   .quick-info-row {
     margin-bottom: 8px;
     font-size: 12px;
@@ -1110,6 +1117,12 @@
         </div>
       </div>
       <div class="filter-group">
+        <label>Second Analysis Date</label>
+        <div class="input-wrap">
+          <input type="date" id="filterSecondAnalysisDate" onchange="filterTable()">
+        </div>
+      </div>
+      <div class="filter-group">
         <label>Expected Install Date</label>
         <div class="input-wrap">
           <input type="date" id="filterExpectedInstallDate" onchange="filterTable()">
@@ -1121,12 +1134,8 @@
           <input type="date" id="filterScheduledInstallDate" onchange="filterTable()">
         </div>
       </div>
-      <div class="filter-group">
-        <label>Second Analysis Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterSecondAnalysisDate" onchange="filterTable()">
-        </div>
-      </div>
+    
+    
     </div>
 
     <div class="filter-row filter-presets">
@@ -1186,7 +1195,7 @@
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
           <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
-          <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option><option value="secondAnalysisDate">Second Analysis Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
+          <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="secondAnalysisDate">Second Analysis Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
           <th class="col-badge">Zendesk Ticket</th>
           <th class="col-badge sortable" data-sort="lastUpdated">Last Updated</th>
           <th class="col-notes">Notes</th>
@@ -1499,12 +1508,6 @@ function progressClass(pct) {
   return 'low';
 }
 
-function overdueHtml(site) {
-  if (!site.overdue) return '';
-  const cls = site.overdue === 'Today' ? 'today' : 'overdue';
-  return `<br><span class="${cls}">${site.overdue}</span>`;
-}
-
 function expandedContentHtml(site) {
   const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
   const dc = site.dataCollection || {};
@@ -1513,15 +1516,21 @@ function expandedContentHtml(site) {
   return `
     <div class="quick-info">
       <h4>Quick Info</h4>
-      <div class="quick-info-row"><span class="label">Owner Name</span><span class="value">${site.creatorName || '—'}</span></div>
-      <div class="quick-info-row"><span class="label">Applicant Name</span><span class="value">${site.applicantName || '—'}</span></div>
-      <div class="quick-info-row"><span class="label">Site URL</span><span class="value"><a href="#" target="_blank">${site.url || '—'}</a></span></div>
-      <div class="quick-info-row"><span class="label">Existing Creator</span><span class="value">${existingMark}</span></div>
-      <div class="quick-info-row"><span class="label">Service Level</span><span class="value">${site.serviceLevel || '—'}</span></div>
-      <div class="quick-info-row"><span class="label">Monthly Pageviews</span><span class="value">${site.pageviews != null ? site.pageviews.toLocaleString() : '—'}</span></div>
-      <div class="quick-info-row"><span class="label">Contract</span><span class="value">${site.contract === 'in contract' ? 'In contract' : (site.contract === 'No contract' ? 'No contract' : '—')}</span></div>
-      <div class="quick-info-row"><span class="label">Salesforce</span><span class="value"><a href="${SALESFORCE_LINK}" target="_blank">Project Link</a></span></div>
-      <div class="quick-info-row"><span class="label">Application</span><span class="value"><a href="https://admin.raptive.com/applications" target="_blank">Link</a></span></div>
+      <div class="quick-info-columns">
+        <div class="quick-info-col">
+          <div class="quick-info-row"><span class="label">Owner Name</span><span class="value">${site.creatorName || '—'}</span></div>
+          <div class="quick-info-row"><span class="label">Company Representative</span><span class="value">${site.applicantName || '—'}</span></div>
+          <div class="quick-info-row"><span class="label">Site URL</span><span class="value"><a href="#" target="_blank">${site.url || '—'}</a></span></div>
+          <div class="quick-info-row"><span class="label">Existing Creator</span><span class="value">${existingMark}</span></div>
+        </div>
+        <div class="quick-info-col">
+          <div class="quick-info-row"><span class="label">Service Level</span><span class="value">${site.serviceLevel || '—'}</span></div>
+          <div class="quick-info-row"><span class="label">Monthly Pageviews</span><span class="value">${site.pageviews != null ? site.pageviews.toLocaleString() : '—'}</span></div>
+          <div class="quick-info-row"><span class="label">Contract</span><span class="value">${site.contract === 'in contract' ? 'In contract' : (site.contract === 'No contract' ? 'No contract' : '—')}</span></div>
+          <div class="quick-info-row"><span class="label">Salesforce</span><span class="value"><a href="${SALESFORCE_LINK}" target="_blank">Project Link</a></span></div>
+          <div class="quick-info-row"><span class="label">Application</span><span class="value"><a href="https://admin.raptive.com/applications" target="_blank">Link</a></span></div>
+        </div>
+      </div>
       <div class="quick-info-row quick-info-toggle">
         <label class="toggle-label">
           <input type="checkbox" class="escalated-toggle" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${site.escalatedToCreatorGrowth ? 'checked' : ''} onchange="updateEscalatedToCreatorGrowth(this.dataset.siteName, this.checked)" onclick="event.stopPropagation()">
@@ -1637,7 +1646,6 @@ function renderTable(sites) {
       <td class="site-name-cell">
         <button class="expand-btn" id="btn-${key}" onclick="toggleRow('${site.name}', event)">▶</button>
         <a href="#">${site.name}</a>
-        ${overdueHtml(site)}
       </td>
       <td>${site.adNetwork || '—'}</td>
       <td class="col-owner"><select class="owner-select" onchange="updateOwner('${site.name}', this.value)" onclick="event.stopPropagation()">${ownerOptions}</select></td>
