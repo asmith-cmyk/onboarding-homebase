@@ -428,6 +428,8 @@
     flex-shrink: 0;
   }
   .badge.done { background: var(--green-bg); color: var(--green); }
+  .badge.sent { background: var(--amber-bg); color: var(--amber); }
+  .badge.invited { background: var(--green-bg); color: var(--green); }
   .badge.active { background: var(--blue-bg); color: var(--blue); }
   .badge.waiting { background: var(--amber-bg); color: var(--amber); }
   .badge.needs-attention { background: var(--red-bg); color: var(--red); }
@@ -464,7 +466,7 @@
   .expanded-content {
     padding: 16px 14px 16px 14px;
     display: grid;
-    grid-template-columns: 32px 120px 80px 80px 90px 100px minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr);
+    grid-template-columns: 32px 120px 80px 80px 90px 100px minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr) minmax(85px, 1fr);
     gap: 0 12px;
     border-top: 1px solid var(--border);
     align-items: start;
@@ -511,9 +513,9 @@
   .quick-info-toggle .escalated-toggle { cursor: pointer; }
   .quick-info-row a:hover { text-decoration: underline; }
   .expanded-sections {
-    grid-column: 7 / 11;
+    grid-column: 7 / 12;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0 12px;
   }
   .expanded-section h4 {
@@ -835,7 +837,7 @@
   .card-details-row .expanded-sections {
     grid-column: unset;
     display: grid !important;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
   }
   .col-status { min-width: 70px; }
@@ -980,7 +982,7 @@
         </div>
       </div>
       <div class="filter-group">
-        <label>GAM Account Status</label>
+        <label>Account Status</label>
         <div class="select-wrap">
           <select id="filterGAM" onchange="filterTable()">
             <option value="">All</option>
@@ -1192,6 +1194,7 @@
           <th class="col-owner sortable" data-sort="owner">Owner</th>
           <th class="col-progress">Progress</th>
           <th class="col-badge sortable" data-sort="dcGeneral">Data Collection</th>
+          <th class="col-badge sortable" data-sort="gamGeneral">Google Ad Manager</th>
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
           <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
@@ -1251,7 +1254,7 @@ const SITES = [
     startDate: '2024-12-01', lastUpdated: '2025-01-20', notes: 'Creator on vacation',
     creatorName: 'James Chen', applicantName: 'Golden Retriever', siteInvolvement: 'Owner', existingCreator: false, serviceLevel: 'Platinum', multisiteCount: null, pageviews: 1250000, contract: 'in contract',
     owiStartedAt: hoursAgo(72), analysisAcceptedAt: hoursAgo(72),
-    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved' },
+    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved', approvals: 'invited' },
     siteAnalysis: { general: 'accepted' },
     siteSetup: { comscore: 'done', installAccess: 'done', privacyPolicy: 'done', identityVerification: 'done', paymentTaxInfo: 'done', serviceAgreement: 'done' },
     secondAnalysis: { state: 'accepted', stateStartedAt: hoursAgo(48) },
@@ -1263,7 +1266,7 @@ const SITES = [
     startDate: '2024-12-15', lastUpdated: '2025-01-22', notes: 'Creator slow to respond',
     creatorName: 'Sarah Mitchell', applicantName: 'Fuschia Flamingo', siteInvolvement: 'Owner', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: 2, pageviews: 2800000, contract: 'No contract',
     owiStartedAt: hoursAgo(80), analysisAcceptedAt: hoursAgo(80),
-    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved' },
+    dataCollection: { googleAnalytics: 'approved', gam: 'approved', domain: 'approved', identity:'approved', address:'approved', adPerformance: 'approved', approvals: 'invited' },
     siteAnalysis: { general: 'accepted' },
     siteSetup: { comscore: 'done', installAccess: 'done', privacyPolicy: 'done', identityVerification: 'done', paymentTaxInfo: 'done', serviceAgreement: 'done' },
     secondAnalysis: { state: 'accepted', stateStartedAt: hoursAgo(60) },
@@ -1392,6 +1395,29 @@ function computeStatus(site) {
     dcGeneral = 'in-progress';
   }
 
+  // Google Ad Manager: Not Started | Pending | Done | Needs Attention
+  let gamGeneral;
+  const gamDone = dc.gam === 'approved' && dc.domain === 'approved' && dc.identity === 'approved' && dc.address === 'approved';
+  const gamNotStarted = ['gam','domain','identity','address'].every(k => {
+    const v = (dc[k] || '').replace(/-/g,' ').toLowerCase();
+    return !v || v === 'not started';
+  });
+  const gamVal = (dc.gam || '').replace(/-/g,' ').toLowerCase();
+  const domainVal = (dc.domain || '').replace(/-/g,' ').toLowerCase();
+  const identityVal = (dc.identity || '').replace(/-/g,' ').toLowerCase();
+  const addressVal = (dc.address || '').replace(/-/g,' ').toLowerCase();
+  const gamAccountFailed = ['inactive','closed','disapproved','deactivated'].includes(gamVal);
+  const domainFailed = ['disapproved','rejected'].includes(domainVal);
+  const identityFailed = ['expired','failed'].includes(identityVal);
+  const addressFailed = ['expired','failed'].includes(addressVal);
+  const hasFailedState = gamAccountFailed || domainFailed || identityFailed || addressFailed;
+  const gamPending = !gamDone && !gamNotStarted && !hasFailedState;
+  if (gamDone) gamGeneral = 'done';
+  else if (hasFailedState) gamGeneral = 'needs-attention';
+  else if (gamNotStarted && owiElapsed !== null && owiElapsed > 48) gamGeneral = 'needs-attention';
+  else if (gamNotStarted) gamGeneral = 'not-started';
+  else if (gamPending && owiElapsed !== null && owiElapsed > 48) gamGeneral = 'needs-attention';
+  else gamGeneral = 'pending';
 
   // Site Analysis (48h SLA from analysisAcceptedAt)
 
@@ -1453,7 +1479,7 @@ function computeStatus(site) {
     sa2General = 'not-started';
   }
 
-  return { dcGeneral, saGeneral, ssGeneral, sa2General };
+  return { dcGeneral, saGeneral, ssGeneral, sa2General, gamGeneral };
 }
 
 let currentView = 'all';
@@ -1463,7 +1489,7 @@ let expandedCardSite = null;
 function badgeHtml(status) {
   const map = {
     'done':                  ['done',                 'Done'],
-    'sent':                  ['done',                 'Sent'],
+    'sent':                  ['sent',                 'Sent'],
     'in-progress':           ['in-progress',          'In Progress'],
     'needs-attention':       ['needs-attention',       'Needs Attention'],
     'accepted':              ['accepted',              'Accepted'],
@@ -1477,6 +1503,7 @@ function badgeHtml(status) {
     'closed':                ['not-started',           'Closed'],
     'deactivated':           ['not-started',           'Deactivated'],
     'not-started':           ['not-started',           'Not Started'],
+    'invited':               ['invited',               'Invited'],
     'mismatch':              ['needs-attention',       'Mismatch'],
     'needs-review':          ['waiting',               'Needs Review'],
     'open':                  ['active',               'Open'],
@@ -1488,8 +1515,8 @@ function badgeHtml(status) {
     'sa2-in-progress':       ['sa2-in-progress',       'In Progress'],
     'sa2-requested':         ['sa2-requested',         'Requested CSVs'],
     'sa2-requested-late':    ['sa2-requested-late',    'Requested CSVs'],
-    'sa2-needs-accept':      ['sa2-needs-accept',      'Sent'],
-    'sa2-needs-accept-late': ['sa2-needs-accept-late', 'Sent'],
+    'sa2-needs-accept':      ['sent',                 'Sent'],
+    'sa2-needs-accept-late': ['sent',                 'Sent'],
   };
   const [cls, label] = map[status] || ['not-started', status];
   return `<span class="badge ${cls}">${label}</span>`;
@@ -1509,7 +1536,7 @@ function progressClass(pct) {
 }
 
 function expandedContentHtml(site) {
-  const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
+  const { dcGeneral, saGeneral, ssGeneral, sa2General, gamGeneral } = computeStatus(site);
   const dc = site.dataCollection || {};
   const ss = site.siteSetup || {};
   const existingMark = site.existingCreator ? '✓ Yes' : 'No';
@@ -1542,11 +1569,15 @@ function expandedContentHtml(site) {
       <div class="expanded-section">
         <h4>Data Collection ${badgeHtml(dcGeneral)}</h4>
         <div class="sub-status-row"><span class="sub-label">Google Analytics</span>${badgeHtml(dc.googleAnalytics || 'not-started')}</div>
-        <div class="sub-status-row"><span class="sub-label">GAM Account</span>${badgeHtml(dc.gam || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Ad Performance</span>${badgeHtml(dc.adPerformance || 'not-started')}</div>
+        <div class="sub-status-row"><span class="sub-label">Approvals</span>${badgeHtml(dc.approvals || 'not-started')}</div>
+      </div>
+      <div class="expanded-section">
+        <h4>Google Ad Manager ${badgeHtml(gamGeneral)}</h4>
+        <div class="sub-status-row"><span class="sub-label">Account</span>${badgeHtml(dc.gam || 'not-started')}</div>
         <div class="sub-status-row"><span class="sub-label">Domain</span>${badgeHtml(dc.domain || 'not-started')}</div>
         <div class="sub-status-row"><span class="sub-label">Identity Verification</span>${badgeHtml(dc.identity || 'not-started')}</div>
         <div class="sub-status-row"><span class="sub-label">Address Verification</span>${badgeHtml(dc.address || 'not-started')}</div>
-        <div class="sub-status-row"><span class="sub-label">Ad Performance</span>${badgeHtml(dc.adPerformance || 'not-started')}</div>
       </div>
       <div class="expanded-section">
         <h4>Site Analysis ${badgeHtml(saGeneral)}</h4>
@@ -1570,7 +1601,7 @@ function expandedHtml(site) {
   const multisiteClass = site.multisiteCount > 1 ? ' multisite-group' : '';
   return `
     <tr class="expanded-row${multisiteClass}" id="exp-${site.name.replace(/\s/g,'_')}">
-      <td colspan="13">
+      <td colspan="14">
         <div class="expanded-content">${expandedContentHtml(site)}</div>
       </td>
     </tr>`;
@@ -1626,7 +1657,7 @@ function renderTable(sites) {
 
   sites.forEach(site => {
     const key = site.name.replace(/\s/g,'_');
-    const { dcGeneral, saGeneral, ssGeneral, sa2General } = computeStatus(site);
+    const { dcGeneral, saGeneral, ssGeneral, sa2General, gamGeneral } = computeStatus(site);
     const ownerVal = site.owner || '';
     const ownerOptions = '<option value="">—</option>' + OWNERS.map(o => `<option value="${o}" ${o === ownerVal ? 'selected' : ''}>${o}</option>`).join('');
     const dynamicDateVal = getDynamicDateValue(site);
@@ -1656,6 +1687,7 @@ function renderTable(sites) {
         </div>
       </td>
       <td>${badgeHtml(dcGeneral)}</td>
+      <td>${badgeHtml(gamGeneral)}</td>
       <td>${badgeHtml(saGeneral)}</td>
       <td>${badgeHtml(ssGeneral)}</td>
       <td>${badgeHtml(sa2General)}</td>
@@ -1680,6 +1712,7 @@ function renderTable(sites) {
         <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
         <div class="card-statuses">
           <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcGeneral)}</span></div>
+          <div class="card-status-item"><span class="phase-name">Google Ad Manager</span><span>${badgeHtml(gamGeneral)}</span></div>
           <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saGeneral)}</span></div>
           <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssGeneral)}</span></div>
           <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2General)}</span></div>
@@ -1701,7 +1734,7 @@ function renderTable(sites) {
 function getNextStep(site, dc, sa, ss, sa2) {
   const dcSteps = [
     { key: 'googleAnalytics', label: 'Google Analytics' },
-    { key: 'gam', label: 'GAM Account' },
+    { key: 'gam', label: 'Account' },
     { key: 'domain', label: 'Domain' },
     { key: 'identity', label: 'Identity Verification' },
     { key: 'address', label: 'Address Verification' },
@@ -1877,6 +1910,7 @@ function getSortValue(site, col) {
   if (col === 'dynamicDate') return getDynamicDateValue(site) || '';
   const st = computeStatus(site);
   if (col === 'dcGeneral') return st.dcGeneral;
+  if (col === 'gamGeneral') return st.gamGeneral;
   if (col === 'saGeneral') return st.saGeneral;
   if (col === 'ssGeneral') return st.ssGeneral;
   if (col === 'sa2General') return st.sa2General;
