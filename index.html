@@ -843,6 +843,7 @@
   .col-status { min-width: 70px; }
   .col-badge { min-width: 85px; }
   .col-action { min-width: 100px; }
+  .whats-next-cell { color: var(--purple); font-weight: 500; min-width: 140px; max-width: 200px; white-space: normal; word-wrap: break-word; }
 
   /* Checkbox */
   input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
@@ -1198,6 +1199,7 @@
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
           <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
+          <th class="col-badge">What's Next</th>
           <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="secondAnalysisDate">Second Analysis Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
           <th class="col-badge">Zendesk Ticket</th>
           <th class="col-badge sortable" data-sort="lastUpdated">Last Updated</th>
@@ -1276,6 +1278,7 @@ const SITES = [
     name: 'GreenWorld Blog', url: 'greenworldblog.org', progress: 75, overdue: null,
     siteStatus: 'Install', adNetwork: 'Ezoic', owner: 'Amy', installDate: '2025-02-01',
     startDate: '2024-12-15', lastUpdated: '2025-02-18', notes: null,
+    noticeDate: '2026-02-28', owiiMacroDate: '2026-03-01', waitingNoticeMacroDate: '2026-03-05', aiResourcesMacroDate: '2026-03-09', secondAnalysisReminderMacroDate: '2026-03-13',
     creatorName: 'Sarah Mitchell', applicantName: 'Pink Elephant', siteInvolvement: 'Owner', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: 2, pageviews: 890000,
     owiStartedAt: hoursAgo(30), analysisAcceptedAt: hoursAgo(72),
     dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
@@ -1288,6 +1291,7 @@ const SITES = [
     name: 'FinanceHacks', url: 'financehacks.net', progress: 50, overdue: null,
     siteStatus: 'Setup', adNetwork: 'Freestar', owner: 'Whitney', installDate: '2025-02-05',
     startDate: '2025-01-15', lastUpdated: '2025-02-16', notes: 'Waiting for docs',
+    noticeDate: '2026-02-25', owiiMacroDate: '2026-02-27', waitingNoticeMacroDate: '2026-03-04', aiResourcesMacroDate: '2026-03-08', secondAnalysisReminderMacroDate: '2026-03-12',
     creatorName: 'Alex Rivera', applicantName: 'Purple Penguin', siteInvolvement: 'Owner', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 450000, contract: 'in contract',
     owiStartedAt: hoursAgo(20), analysisAcceptedAt: hoursAgo(20),
     dataCollection: { gam: 'approved', domain: 'pending', identity:'pending', address:'pending' },
@@ -1300,6 +1304,7 @@ const SITES = [
     name: 'TravelDiaries', url: 'traveldiaries.co', progress: 50, overdue: '3 days overdue',
     siteStatus: 'Setup', adNetwork: 'Monumetric', owner: 'Antoinette', installDate: '2025-02-10',
     startDate: '2025-01-20', lastUpdated: '2025-02-20', notes: null,
+    noticeDate: '2026-02-28', owiiMacroDate: '2026-03-02', waitingNoticeMacroDate: '2026-03-04', aiResourcesMacroDate: '2026-03-08', secondAnalysisReminderMacroDate: '2026-03-12',
     creatorName: 'Emma Watson', applicantName: 'Green Eggs and Ham', siteInvolvement: 'Owner', existingCreator: false, serviceLevel: 'Rise', multisiteCount: null, pageviews: 320000,
     owiStartedAt: hoursAgo(96), analysisAcceptedAt: hoursAgo(96),
     dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
@@ -1312,6 +1317,7 @@ const SITES = [
     name: 'CookingCorner', url: 'cookingcorner.io', progress: 50, overdue: '3 days overdue',
     siteStatus: 'Setup', adNetwork: 'Media.net', owner: 'Amy', installDate: '2025-02-12',
     startDate: '2025-01-25', lastUpdated: '2025-02-19', notes: 'Follow up scheduled',
+    noticeDate: '2026-03-01', owiiMacroDate: '2026-03-03', waitingNoticeMacroDate: '2026-03-06', aiResourcesMacroDate: '2026-03-10', secondAnalysisReminderMacroDate: '2026-03-14',
     creatorName: 'David Kim', applicantName: 'Red Rum', siteInvolvement: 'Owner', existingCreator: false, serviceLevel: 'Platinum', multisiteCount: null, pageviews: 2100000,
     owiStartedAt: hoursAgo(60), analysisAcceptedAt: hoursAgo(60),
     dataCollection: { gam: 'pending', domain: 'approved', identity:'pending', address:'pending' },
@@ -1601,7 +1607,7 @@ function expandedHtml(site) {
   const multisiteClass = site.multisiteCount > 1 ? ' multisite-group' : '';
   return `
     <tr class="expanded-row${multisiteClass}" id="exp-${site.name.replace(/\s/g,'_')}">
-      <td colspan="14">
+      <td colspan="15">
         <div class="expanded-content">${expandedContentHtml(site)}</div>
       </td>
     </tr>`;
@@ -1640,6 +1646,37 @@ function getDynamicDateValue(site) {
     return d.toISOString().slice(0,10);
   }
   return '';
+}
+
+const WHATS_NEXT_DATES = [
+  { getVal: s => s.startDate || '', label: 'Actual Start Date' },
+  { getVal: s => s.noticeDate || '', label: 'Notice Date' },
+  { getVal: s => s.owiiMacroDate || '', label: 'OWII Macro' },
+  { getVal: s => s.waitingNoticeMacroDate || '', label: 'Waiting Out Your Notice Macro' },
+  { getVal: s => s.aiResourcesMacroDate || '', label: 'AI Resources Macro' },
+  { getVal: s => s.secondAnalysisReminderMacroDate || '', label: '2A Reminder Macro' },
+  { getVal: s => s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '', label: 'Second Analysis Date' },
+  { getVal: s => s.scheduledInstallDate || s.installDate || '', label: 'Scheduled Install Date' }
+];
+function getWhatsNext(site) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let soonest = null;
+  let soonestLabel = '';
+  for (const item of WHATS_NEXT_DATES) {
+    const val = item.getVal(site);
+    if (!val) continue;
+    const d = new Date(val);
+    d.setHours(0, 0, 0, 0);
+    if (d >= today && (!soonest || d < soonest)) {
+      soonest = d;
+      soonestLabel = item.label;
+    }
+  }
+  if (soonest && soonestLabel) {
+    return soonestLabel + ' — ' + formatDateMdY(soonest);
+  }
+  return '—';
 }
 
 function renderTable(sites) {
@@ -1691,6 +1728,7 @@ function renderTable(sites) {
       <td>${badgeHtml(saGeneral)}</td>
       <td>${badgeHtml(ssGeneral)}</td>
       <td>${badgeHtml(sa2General)}</td>
+      <td class="whats-next-cell">${getWhatsNext(site)}</td>
       <td><input type="date" class="install-date-input" value="${dynamicDateVal}" onchange="updateDynamicDate('${site.name}', this.value)" onclick="event.stopPropagation()"></td>
       <td><a href="https://raptive.zendesk.com/agent/home/tickets" target="_blank" class="btn-link-zen">&#128172; Ticket</a></td>
       <td>${site.lastUpdated || '—'}</td>
