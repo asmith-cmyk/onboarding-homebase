@@ -501,16 +501,6 @@
   .quick-info-row .label { color: var(--text-muted); font-size: 11px; }
   .quick-info-row .value { display: block; margin-top: 2px; }
   .quick-info-row a { color: var(--blue); text-decoration: none; }
-  .quick-info-toggle { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-  .quick-info-toggle .toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    cursor: pointer;
-    color: var(--text);
-  }
-  .quick-info-toggle .escalated-toggle { cursor: pointer; }
   .quick-info-row a:hover { text-decoration: underline; }
   .expanded-sections {
     grid-column: 7 / 12;
@@ -1565,12 +1555,7 @@ function expandedContentHtml(site) {
           <div class="quick-info-row"><span class="label">Application</span><span class="value"><a href="https://admin.raptive.com/applications" target="_blank">Link</a></span></div>
         </div>
       </div>
-      <div class="quick-info-row quick-info-toggle">
-        <label class="toggle-label">
-          <input type="checkbox" class="escalated-toggle" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${site.escalatedToCreatorGrowth ? 'checked' : ''} onchange="updateEscalatedToCreatorGrowth(this.dataset.siteName, this.checked)" onclick="event.stopPropagation()">
-          <span>Escalated to Creator Growth</span>
-        </label>
-      </div>
+      <div class="quick-info-row"><span class="label">Assisted by Creator Growth</span><span class="value">${site.escalatedToCreatorGrowth ? 'Yes' : 'No'}</span></div>
     </div>
     <div class="expanded-sections">
       <div class="expanded-section">
@@ -1996,11 +1981,6 @@ function updateInstallDate(siteName, date) {
 function updateNotes(siteName, note) {
   const site = SITES.find(s => s.name === siteName);
   if (site) site.notes = (note || '').trim() || null;
-}
-
-function updateEscalatedToCreatorGrowth(siteName, checked) {
-  const site = SITES.find(s => s.name === siteName);
-  if (site) site.escalatedToCreatorGrowth = !!checked;
 }
 
 // Init
