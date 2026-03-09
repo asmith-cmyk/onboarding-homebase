@@ -182,6 +182,23 @@
     background: var(--bg);
     border-color: var(--accent);
   }
+  .btn-clear-sites {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    margin-left: auto;
+  }
+  .btn-clear-sites:hover {
+    background: var(--bg);
+    border-color: var(--accent);
+  }
 
   .filter-group label {
     display: block;
@@ -211,6 +228,20 @@
   }
   .filter-group .input-wrap {
     position: relative;
+  }
+  .date-range-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .date-range-wrap .input-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  .date-range-sep {
+    color: var(--text-muted);
+    font-size: 12px;
+    flex-shrink: 0;
   }
   .filter-group .input-wrap .clear-btn {
     position: absolute;
@@ -1103,28 +1134,36 @@
           </select>
         </div>
       </div>
-      <div class="filter-group">
+      <div class="filter-group filter-date-range">
         <label>Actual Start Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterActualStartDate" onchange="filterTable()">
+        <div class="date-range-wrap">
+          <div class="input-wrap"><input type="date" id="filterActualStartDateFrom" onchange="filterTable()" title="From date"></div>
+          <span class="date-range-sep">–</span>
+          <div class="input-wrap"><input type="date" id="filterActualStartDateTo" placeholder="To" onchange="filterTable()" title="To date"></div>
         </div>
       </div>
-      <div class="filter-group">
+      <div class="filter-group filter-date-range">
         <label>Second Analysis Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterSecondAnalysisDate" onchange="filterTable()">
+        <div class="date-range-wrap">
+          <div class="input-wrap"><input type="date" id="filterSecondAnalysisDateFrom" onchange="filterTable()" title="From date"></div>
+          <span class="date-range-sep">–</span>
+          <div class="input-wrap"><input type="date" id="filterSecondAnalysisDateTo" onchange="filterTable()" title="To date"></div>
         </div>
       </div>
-      <div class="filter-group">
+      <div class="filter-group filter-date-range">
         <label>Expected Install Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterExpectedInstallDate" onchange="filterTable()">
+        <div class="date-range-wrap">
+          <div class="input-wrap"><input type="date" id="filterExpectedInstallDateFrom" onchange="filterTable()" title="From date"></div>
+          <span class="date-range-sep">–</span>
+          <div class="input-wrap"><input type="date" id="filterExpectedInstallDateTo" onchange="filterTable()" title="To date"></div>
         </div>
       </div>
-      <div class="filter-group">
+      <div class="filter-group filter-date-range">
         <label>Scheduled Install Date</label>
-        <div class="input-wrap">
-          <input type="date" id="filterScheduledInstallDate" onchange="filterTable()">
+        <div class="date-range-wrap">
+          <div class="input-wrap"><input type="date" id="filterScheduledInstallDateFrom" onchange="filterTable()" title="From date"></div>
+          <span class="date-range-sep">–</span>
+          <div class="input-wrap"><input type="date" id="filterScheduledInstallDateTo" onchange="filterTable()" title="To date"></div>
         </div>
       </div>
     
@@ -1139,6 +1178,7 @@
         <button type="button" class="btn-preset">Priority Onboards</button>
         <button type="button" class="btn-preset">Remaining Month Install Forecast</button>
       </div>
+      <button type="button" class="btn-clear-sites" onclick="clearFilters()">Clear Filters</button>
     </div>
 
     </div>
@@ -1219,6 +1259,15 @@ const H = 3600000; // 1 hour in ms
 
 // Helper: ms ago
 function hoursAgo(h) { return NOW - h * H; }
+
+// Check if date falls within range (from/to can be empty)
+function dateInRange(siteDate, from, to) {
+  if (!from && !to) return true;
+  if (!siteDate) return false;
+  if (from && siteDate < from) return false;
+  if (to && siteDate > to) return false;
+  return true;
+}
 
 // Format date as MM/DD/YYYY
 function formatDateMdY(val) {
@@ -1879,17 +1928,19 @@ function filterTable() {
       if (secondAnalysis === 'Accepted' && sa2General !== 'sa2-accepted') return false;
       if (secondAnalysis === 'Needs Attention' && sa2General !== 'sa2-requested-late' && sa2General !== 'sa2-needs-accept-late') return false;
     }
-    const actualStartDateFilter = document.getElementById('filterActualStartDate')?.value;
-    const expectedInstallDateFilter = document.getElementById('filterExpectedInstallDate')?.value;
-    const scheduledInstallDateFilter = document.getElementById('filterScheduledInstallDate')?.value;
-    const secondAnalysisDateFilter = document.getElementById('filterSecondAnalysisDate')?.value;
-    if (actualStartDateFilter && (s.startDate || '') !== actualStartDateFilter) return false;
-    if (expectedInstallDateFilter && ((s.expectedInstallDate || s.installDate) || '') !== expectedInstallDateFilter) return false;
-    if (scheduledInstallDateFilter && ((s.scheduledInstallDate || s.installDate) || '') !== scheduledInstallDateFilter) return false;
-    if (secondAnalysisDateFilter) {
-      const sa2Date = s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '';
-      if (sa2Date !== secondAnalysisDateFilter) return false;
-    }
+    const actualStartFrom = document.getElementById('filterActualStartDateFrom')?.value;
+    const actualStartTo = document.getElementById('filterActualStartDateTo')?.value;
+    const expectedInstallFrom = document.getElementById('filterExpectedInstallDateFrom')?.value;
+    const expectedInstallTo = document.getElementById('filterExpectedInstallDateTo')?.value;
+    const scheduledInstallFrom = document.getElementById('filterScheduledInstallDateFrom')?.value;
+    const scheduledInstallTo = document.getElementById('filterScheduledInstallDateTo')?.value;
+    const secondAnalysisFrom = document.getElementById('filterSecondAnalysisDateFrom')?.value;
+    const secondAnalysisTo = document.getElementById('filterSecondAnalysisDateTo')?.value;
+    if (!dateInRange(s.startDate || '', actualStartFrom, actualStartTo)) return false;
+    if (!dateInRange((s.expectedInstallDate || s.installDate) || '', expectedInstallFrom, expectedInstallTo)) return false;
+    if (!dateInRange((s.scheduledInstallDate || s.installDate) || '', scheduledInstallFrom, scheduledInstallTo)) return false;
+    const sa2Date = s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '';
+    if (!dateInRange(sa2Date, secondAnalysisFrom, secondAnalysisTo)) return false;
     if (setupIDVerification) {
       const ss = s.siteSetup || {};
       let idVer = (ss.identityVerification || ss.verification || '').replace(/-/g,' ').toLowerCase();
@@ -1961,6 +2012,24 @@ function toggleFilters() {
 
 function clearSearch() {
   document.getElementById('siteNameSearch').value = '';
+  filterTable();
+}
+
+function clearFilters() {
+  const ids = [
+    'siteNameSearch', 'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner',
+    'filterDataCollection', 'filterGAM', 'filterDomain', 'filterIDVerification', 'filterAddressVerification',
+    'filterSiteAnalysis', 'filterSiteSetup', 'filterSecondAnalysis', 'filterSetupIDVerification', 'filterPaymentTax',
+    'filterActualStartDateFrom', 'filterActualStartDateTo', 'filterSecondAnalysisDateFrom', 'filterSecondAnalysisDateTo',
+    'filterExpectedInstallDateFrom', 'filterExpectedInstallDateTo', 'filterScheduledInstallDateFrom', 'filterScheduledInstallDateTo'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (el.tagName === 'SELECT') el.value = '';
+      else el.value = '';
+    }
+  });
   filterTable();
 }
 
