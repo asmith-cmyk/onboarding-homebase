@@ -622,6 +622,16 @@
     border: 1px solid #b3cfe8; transition: all 0.15s; white-space: nowrap;
   }
   .btn-link-zen:hover { background: #ccdff5; }
+  .zen-ticket-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .zen-ticket-date {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
 
   /* FOOTER */
   .table-footer {
@@ -825,6 +835,7 @@
     background: linear-gradient(to right, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
   }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-header-left { display: flex; align-items: center; gap: 4px; }
   .card-header strong { font-size: 14px; }
   .card-badge { font-size: 12px; color: var(--text-muted); }
   .card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
@@ -889,7 +900,28 @@
   .col-status { min-width: 70px; }
   .col-badge { min-width: 85px; }
   .col-action { min-width: 100px; }
-  .whats-next-cell { color: var(--purple); font-weight: 500; min-width: 140px; max-width: 200px; white-space: normal; word-wrap: break-word; }
+  .whats-next-cell {
+    color: var(--purple);
+    font-weight: 600;
+    font-size: 12px;
+    min-width: 140px;
+    max-width: 200px;
+    white-space: normal;
+    word-wrap: break-word;
+    padding: 6px 12px;
+    background: var(--purple-bg);
+    border: 1px solid #c4b8e8;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(107, 70, 193, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .whats-next-email-alert {
+    color: #a23b4c;
+    font-size: 11px;
+    font-weight: 500;
+  }
 
   /* Checkbox */
   input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
@@ -1256,8 +1288,7 @@
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
           <th class="col-badge">What's Next</th>
           <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="secondAnalysisDate">Second Analysis Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
-          <th class="col-badge">Zendesk Ticket</th>
-          <th class="col-badge sortable" data-sort="lastUpdated">Last Updated</th>
+          <th class="col-badge sortable" data-sort="lastUpdated">Zendesk Ticket</th>
           <th class="col-notes">Notes</th>
         </tr>
       </thead>
@@ -1394,7 +1425,7 @@ const SITES = [
     name: 'SportsUncut', url: 'sportsuncut.com', progress: 50, overdue: '2 days overdue',
     siteStatus: 'Setup', adNetwork: 'AdVally', owner: 'Michelle', installDate: '2025-02-15',
     startDate: '2025-01-28', lastUpdated: '2025-02-21', notes: null,
-    creatorName: 'Mike Taylor', applicantName: 'Berry Blue', companyRepresentativeType: 'Company Representative', registeredCompanyName: 'SportsUncut Entertainment LLC', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 680000,
+    creatorName: 'Mike Taylor', applicantName: 'Berry Blue', companyRepresentativeType: 'Company Representative', registeredCompanyName: 'SportsUncut Entertainment LLC', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 680000, emailResponseNeeded: true,
     owiStartedAt: hoursAgo(55), analysisAcceptedAt: hoursAgo(55),
     dataCollection: { gam: 'approved', domain: 'rejected' , identity:'pending', address:'pending'},
     siteAnalysis: { general: 'done' },
@@ -1406,7 +1437,7 @@ const SITES = [
     name: 'ParentingNow', url: 'parentingnow.com', progress: 50, overdue: '2 days overdue',
     siteStatus: 'Checkup', adNetwork: 'SHE Media', owner: 'Whitney', installDate: '2025-02-18',
     startDate: '2025-02-01', lastUpdated: '2025-02-22', notes: null,
-    creatorName: 'Lisa Park', applicantName: 'Yellow Duck', companyRepresentativeType: 'Other', registeredCompanyName: 'ParentingNow Family Media', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: null, pageviews: 1500000,
+    creatorName: 'Lisa Park', applicantName: 'Yellow Duck', companyRepresentativeType: 'Other', registeredCompanyName: 'ParentingNow Family Media', existingCreator: true, serviceLevel: 'Platinum Elite', multisiteCount: null, pageviews: 1500000, emailResponseNeeded: true,
     owiStartedAt: hoursAgo(52), analysisAcceptedAt: hoursAgo(52),
     dataCollection: { gam: 'approved', domain: 'pending', identity:'pending', address:'pending' },
     siteAnalysis: { general: 'done' },
@@ -1430,7 +1461,7 @@ const SITES = [
     name: 'MusicZone Daily', url: 'musiczonedaily.com', progress: 25, overdue: null,
     siteStatus: 'Install', adNetwork: 'Newor', owner: 'Amy', installDate: '2025-02-22',
     startDate: '2025-02-10', lastUpdated: '2025-02-24', notes: null,
-    creatorName: 'Chris Evans', applicantName: 'Blueberry Pie', companyRepresentativeType: 'Third Party Manager', registeredCompanyName: 'MusicZone Digital Inc.', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 520000,
+    creatorName: 'Chris Evans', applicantName: 'Blueberry Pie', companyRepresentativeType: 'Third Party Manager', registeredCompanyName: 'MusicZone Digital Inc.', existingCreator: false, serviceLevel: 'Insider', multisiteCount: null, pageviews: 520000, emailResponseNeeded: true,
     owiStartedAt: hoursAgo(10), analysisAcceptedAt: null,
     dataCollection: { gam: 'pending', domain: 'pending', identity:'pending', address:'pending' },
     siteAnalysis: { general: 'in-progress' },
@@ -1667,7 +1698,7 @@ function expandedHtml(site) {
   const multisiteClass = site.multisiteCount > 1 ? ' multisite-group' : '';
   return `
     <tr class="expanded-row${multisiteClass}" id="exp-${site.name.replace(/\s/g,'_')}">
-      <td colspan="15">
+      <td colspan="14">
         <div class="expanded-content">${expandedContentHtml(site)}</div>
       </td>
     </tr>`;
@@ -1788,10 +1819,9 @@ function renderTable(sites) {
       <td>${badgeHtml(saGeneral)}</td>
       <td>${badgeHtml(ssGeneral)}</td>
       <td>${badgeHtml(sa2General)}</td>
-      <td class="whats-next-cell">${getWhatsNext(site)}</td>
+      <td class="whats-next-cell">${getWhatsNext(site)}${site.emailResponseNeeded ? '<span class="whats-next-email-alert">Email response needed</span>' : ''}</td>
       <td><input type="date" class="install-date-input" value="${dynamicDateVal}" onchange="updateDynamicDate('${site.name}', this.value)" onclick="event.stopPropagation()"></td>
-      <td><a href="https://raptive.zendesk.com/agent/home/tickets" target="_blank" class="btn-link-zen">&#128172; Ticket</a></td>
-      <td>${site.lastUpdated || '—'}</td>
+      <td class="zen-ticket-cell"><a href="https://raptive.zendesk.com/agent/home/tickets" target="_blank" class="btn-link-zen">&#128172; Ticket</a><span class="zen-ticket-date">${formatDateMdY(site.lastUpdated)}</span></td>
       <td><input type="text" class="notes-input" placeholder="Add note..." value="${(site.notes || '').replace(/"/g,'&quot;')}" title="${(site.notes || 'Click to add note').replace(/"/g,'&quot;')}" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onchange="updateNotes(this.dataset.siteName, this.value)" onblur="updateNotes(this.dataset.siteName, this.value)" onclick="event.stopPropagation()"></td>`;
 
     tbody.appendChild(tr);
@@ -1804,7 +1834,7 @@ function renderTable(sites) {
       const schedInstall = formatDateMdY(site.scheduledInstallDate || site.installDate);
       const lastUpd = formatDateMdY(site.lastUpdated);
       card.innerHTML = `
-        <div class="card-header"><strong>${site.name}</strong><span class="card-badge">${site.progress}%</span></div>
+        <div class="card-header"><span class="card-header-left"><strong>${site.name}</strong></span><span class="card-badge">${site.progress}%</span></div>
         <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
         <div class="card-dates"><span class="date-line">Last Updated: ${lastUpd}</span><span class="date-line">Scheduled Install Date: ${schedInstall}</span></div>
         <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
