@@ -182,6 +182,11 @@
     background: var(--bg);
     border-color: var(--accent);
   }
+  .btn-preset.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
   .btn-clear-sites {
     padding: 8px 16px;
     border: 1px solid var(--border);
@@ -1212,6 +1217,7 @@
       <label>Presets</label>
       <div class="preset-buttons">
         <button type="button" class="btn-preset">GAM Issues</button>
+        <button type="button" class="btn-preset" id="presetPersonaIssues" onclick="applyPreset('persona-issues', this)">Persona Issues</button>
         <button type="button" class="btn-preset">Pre-schedule</button>
         <button type="button" class="btn-preset">Priority Onboards</button>
         <button type="button" class="btn-preset">Remaining Month Install Forecast</button>
@@ -1448,6 +1454,42 @@ const SITES = [
     siteSetup: { verification: 'not-started', payment: 'not-started', agreement: 'not-started' },
     secondAnalysis: { state: 'needs-accept', stateStartedAt: hoursAgo(26) }, // >24h → red
     action: 'continue'
+  },
+  {
+    name: 'TechBlog Pro', url: 'techblogpro.com', progress: 40, overdue: null,
+    siteStatus: 'Setup', adNetwork: 'AdVally', owner: 'Michelle', installDate: '2025-03-01',
+    startDate: '2025-02-12', lastUpdated: '2025-02-25', notes: null,
+    creatorName: 'Alex Kim', applicantName: 'Tech Corp', companyRepresentativeType: 'Company Representative', registeredCompanyName: 'TechBlog Pro LLC', existingCreator: false, serviceLevel: 'Rise', multisiteCount: null, pageviews: 320000,
+    owiStartedAt: hoursAgo(72), analysisAcceptedAt: hoursAgo(72),
+    dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { identityVerification: 'needs-review', payment: 'pending', agreement: 'not-started' },
+    secondAnalysis: { state: 'not-started', stateStartedAt: null },
+    action: 'continue'
+  },
+  {
+    name: 'Foodie Finds', url: 'foodiefinds.net', progress: 35, overdue: '1 day overdue',
+    siteStatus: 'Setup', adNetwork: 'Sortable', owner: 'Whitney', installDate: '2025-02-28',
+    startDate: '2025-02-08', lastUpdated: '2025-02-24', notes: null,
+    creatorName: 'Sam Davis', applicantName: 'Food Corp', companyRepresentativeType: 'Other', registeredCompanyName: 'Foodie Finds Media', existingCreator: true, serviceLevel: 'Insider', multisiteCount: null, pageviews: 210000,
+    owiStartedAt: hoursAgo(96), analysisAcceptedAt: hoursAgo(96),
+    dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { identityVerification: 'error', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'not-started', stateStartedAt: null },
+    action: 'continue'
+  },
+  {
+    name: 'Travel Tales', url: 'traveltales.co', progress: 30, overdue: null,
+    siteStatus: 'Setup', adNetwork: 'Newor', owner: 'Amy', installDate: '2025-03-05',
+    startDate: '2025-02-15', lastUpdated: '2025-02-26', notes: null,
+    creatorName: 'Jordan Lee', applicantName: 'Travel Co', companyRepresentativeType: 'Third Party Manager', registeredCompanyName: 'Travel Tales Inc.', existingCreator: false, serviceLevel: 'Platinum Elite', multisiteCount: null, pageviews: 450000,
+    owiStartedAt: hoursAgo(48), analysisAcceptedAt: hoursAgo(48),
+    dataCollection: { gam: 'approved', domain: 'approved', identity:'pending', address:'pending' },
+    siteAnalysis: { general: 'done' },
+    siteSetup: { identityVerification: 'declined', payment: 'not-started', agreement: 'not-started' },
+    secondAnalysis: { state: 'not-started', stateStartedAt: null },
+    action: 'continue'
   }
 ];
 
@@ -1564,6 +1606,7 @@ function computeStatus(site) {
 }
 
 let currentView = 'all';
+let activePreset = null;
 let expandedRows = new Set();
 let expandedCardSite = null;
 
@@ -1918,6 +1961,11 @@ function filterTable() {
     if (siteStatusVals.length && !siteStatusVals.includes(s.siteStatus)) return false;
     if (adNetworkVals.length && !adNetworkVals.includes(s.adNetwork)) return false;
     if (currentView === 'needs-attention' && s.action !== 'complete') return false;
+    if (activePreset === 'persona-issues') {
+      const personaVer = (s.siteSetup?.identityVerification || s.siteSetup?.verification || '').replace(/-/g,' ').toLowerCase();
+      const personaIssuesStatuses = ['needs review', 'error', 'pending', 'declined'];
+      if (!personaIssuesStatuses.includes(personaVer)) return false;
+    }
     const actualStartFrom = document.getElementById('filterActualStartDateFrom')?.value;
     const actualStartTo = document.getElementById('filterActualStartDateTo')?.value;
     const expectedInstallFrom = document.getElementById('filterExpectedInstallDateFrom')?.value;
@@ -1992,10 +2040,23 @@ function clearSearch() {
   filterTable();
 }
 
+function applyPreset(presetId, btn) {
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+  if (activePreset === presetId) {
+    activePreset = null;
+  } else {
+    activePreset = presetId;
+    if (btn) btn.classList.add('active');
+  }
+  filterTable();
+}
+
 function clearFilters() {
   const selectIds = [
     'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner'
   ];
+  activePreset = null;
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
   selectIds.forEach(id => {
     const el = document.getElementById(id);
     if (el && el.tagName === 'SELECT') {
