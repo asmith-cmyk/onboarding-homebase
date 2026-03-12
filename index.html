@@ -1518,7 +1518,7 @@ function computeStatus(site) {
     dcGeneral = 'in-progress';
   }
 
-  // Google Ad Manager: Not Started | Pending | Done | Needs Attention
+  // Google Ad Manager: Not Started | Pending | Approved | Needs Attention
   let gamGeneral;
   const gamDone = dc.gam === 'approved' && dc.domain === 'approved' && dc.identity === 'approved' && dc.address === 'approved';
   const gamNotStarted = ['gam','domain','identity','address'].every(k => {
@@ -1535,7 +1535,7 @@ function computeStatus(site) {
   const addressFailed = ['expired','failed'].includes(addressVal);
   const hasFailedState = gamAccountFailed || domainFailed || identityFailed || addressFailed;
   const gamPending = !gamDone && !gamNotStarted && !hasFailedState;
-  if (gamDone) gamGeneral = 'done';
+  if (gamDone) gamGeneral = 'approved';
   else if (hasFailedState) gamGeneral = 'needs-attention';
   else if (gamNotStarted && owiElapsed !== null && owiElapsed > 48) gamGeneral = 'needs-attention';
   else if (gamNotStarted) gamGeneral = 'not-started';
