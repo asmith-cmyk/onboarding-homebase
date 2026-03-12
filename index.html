@@ -1170,170 +1170,7 @@
       </div>
     </div>
 
-    <!-- Row 2: 5 columns — Data Collection, GAM Account Status, Domain Status, ID Verification, Address Verification -->
-    <div class="filter-row cols-5">
-      <div class="filter-group">
-        <label>Data Collection</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterDataCollection">
-          <div class="multiselect-trigger" data-for="filterDataCollection"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterDataCollection"></div>
-          <select id="filterDataCollection" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>In Progress</option>
-            <option>Done</option>
-            <option>Needs Attention</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Account Status</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterGAM">
-          <div class="multiselect-trigger" data-for="filterGAM"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterGAM"></div>
-          <select id="filterGAM" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Invited</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Inactive</option>
-            <option>Closed</option>
-            <option>Disapproved</option>
-            <option>Deactivated</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Domain Status</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterDomain">
-          <div class="multiselect-trigger" data-for="filterDomain"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterDomain"></div>
-          <select id="filterDomain" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Ads.txt not updated</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Disapproved</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>ID Verification</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterIDVerification">
-          <div class="multiselect-trigger" data-for="filterIDVerification"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterIDVerification"></div>
-          <select id="filterIDVerification" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Pending</option>
-            <option>Expired</option>
-            <option>Verified</option>
-            <option>Exempt</option>
-            <option>Failed</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Address Verification</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterAddressVerification">
-          <div class="multiselect-trigger" data-for="filterAddressVerification"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterAddressVerification"></div>
-          <select id="filterAddressVerification" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Pending</option>
-            <option>Expired</option>
-            <option>Verified</option>
-            <option>Exempt</option>
-            <option>Failed</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 3: Site Analysis, Site Setup, Persona Verification, Payment and Tax Info, Second Analysis -->
-    <div class="filter-row cols-5">
-      <div class="filter-group">
-        <label>Site Analysis</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterSiteAnalysis">
-          <div class="multiselect-trigger" data-for="filterSiteAnalysis"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterSiteAnalysis"></div>
-          <select id="filterSiteAnalysis" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>In Progress</option>
-            <option>Sent</option>
-            <option>Accepted</option>
-            <option>Needs Attention</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Site Setup</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterSiteSetup">
-          <div class="multiselect-trigger" data-for="filterSiteSetup"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterSiteSetup"></div>
-          <select id="filterSiteSetup" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>In Progress</option>
-            <option>Done</option>
-            <option>Needs Attention</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Persona Verification</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterSetupIDVerification">
-          <div class="multiselect-trigger" data-for="filterSetupIDVerification"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterSetupIDVerification"></div>
-          <select id="filterSetupIDVerification" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Approved</option>
-            <option>Needs Review</option>
-            <option>Open</option>
-            <option>Pre Approved</option>
-            <option>Pending</option>
-            <option>Error</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Payment and Tax Info</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterPaymentTax">
-          <div class="multiselect-trigger" data-for="filterPaymentTax"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterPaymentTax"></div>
-          <select id="filterPaymentTax" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Pending</option>
-            <option>Done</option>
-            <option>Mismatch</option>
-          </select>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>Second Analysis</label>
-        <div class="select-wrap multiselect-wrap" id="wrap-filterSecondAnalysis">
-          <div class="multiselect-trigger" data-for="filterSecondAnalysis"><span class="multiselect-label">All</span><span class="multiselect-arrow">▾</span></div>
-          <div class="multiselect-dropdown" id="dropdown-filterSecondAnalysis"></div>
-          <select id="filterSecondAnalysis" multiple onchange="filterTable()">
-            <option value="">All</option>
-            <option>Not Started</option>
-            <option>Requested CSVs</option>
-            <option>In Progress</option>
-            <option>Sent</option>
-            <option>Accepted</option>
-            <option>Needs Attention</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 4: Date filters only -->
+    <!-- Row 2: Date filters only -->
     <div class="filter-row cols-4">
       <div class="filter-group filter-date-range">
         <label>Actual Start Date</label>
@@ -1424,7 +1261,6 @@
           <th class="col-site sortable" data-sort="name">Site Name</th>
           <th class="col-ad-network sortable" data-sort="adNetwork">Ad Network</th>
           <th class="col-owner sortable" data-sort="owner">Owner</th>
-          <th class="col-progress">Progress</th>
           <th class="col-badge sortable" data-sort="dcGeneral">Data Collection</th>
           <th class="col-badge sortable" data-sort="gamGeneral">Google Ad Manager</th>
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
@@ -1842,7 +1678,7 @@ function expandedHtml(site) {
   const multisiteClass = site.multisiteCount > 1 ? ' multisite-group' : '';
   return `
     <tr class="expanded-row${multisiteClass}" id="exp-${site.name.replace(/\s/g,'_')}">
-      <td colspan="14">
+      <td colspan="13">
         <div class="expanded-content">${expandedContentHtml(site)}</div>
       </td>
     </tr>`;
@@ -1952,12 +1788,6 @@ function renderTable(sites) {
       </td>
       <td>${site.adNetwork || '—'}</td>
       <td class="col-owner"><select class="owner-select" onchange="updateOwner('${site.name}', this.value)" onclick="event.stopPropagation()">${ownerOptions}</select></td>
-      <td>
-        <div class="progress-wrap">
-          <div class="progress-bar"><div class="progress-fill ${progressClass(site.progress)}" style="width:${site.progress}%"></div></div>
-          <span class="progress-pct">${site.progress}%</span>
-        </div>
-      </td>
       <td>${badgeHtml(dcGeneral)}</td>
       <td>${badgeHtml(gamGeneral)}</td>
       <td>${badgeHtml(saGeneral)}</td>
@@ -2073,17 +1903,7 @@ function getMultiSelectValues(selId) {
 function filterTable() {
   const search = document.getElementById('siteNameSearch').value.toLowerCase();
   const siteStatusVals = getMultiSelectValues('filterSiteStatus');
-  const gamVals = getMultiSelectValues('filterGAM');
-  const domainVals = getMultiSelectValues('filterDomain');
-  const idVerificationVals = getMultiSelectValues('filterIDVerification');
-  const addressVerificationVals = getMultiSelectValues('filterAddressVerification');
-  const dataCollectionVals = getMultiSelectValues('filterDataCollection');
   const adNetworkVals = getMultiSelectValues('filterAdNetwork');
-  const siteAnalysisVals = getMultiSelectValues('filterSiteAnalysis');
-  const siteSetupVals = getMultiSelectValues('filterSiteSetup');
-  const secondAnalysisVals = getMultiSelectValues('filterSecondAnalysis');
-  const setupIDVerificationVals = getMultiSelectValues('filterSetupIDVerification');
-  const paymentTaxVals = getMultiSelectValues('filterPaymentTax');
   const serviceLevelVals = getMultiSelectValues('filterServiceLevel');
   const ownerVals = getMultiSelectValues('filterOwner');
 
@@ -2096,54 +1916,8 @@ function filterTable() {
       if (!matchName && !matchUrl && !matchCreator) return false;
     }
     if (siteStatusVals.length && !siteStatusVals.includes(s.siteStatus)) return false;
-    const dc = s.dataCollection || {};
-    const gamVal = (dc.gam || 'not-started').replace(/-/g,' ').toLowerCase();
-    const domainVal = (dc.domain || 'not-started').replace(/-/g,' ').toLowerCase();
-    const identityVal = (dc.identity || 'not-started').replace(/-/g,' ').toLowerCase();
-    const addressVal = (dc.address || 'not-started').replace(/-/g,' ').toLowerCase();
-    if (gamVals.length && !gamVals.some(g => gamVal === g.toLowerCase())) return false;
-    if (domainVals.length && !domainVals.some(d => domainVal === d.toLowerCase())) return false;
-    if (idVerificationVals.length && !idVerificationVals.some(iv => identityVal === iv.toLowerCase())) return false;
-    if (addressVerificationVals.length && !addressVerificationVals.some(av => addressVal === av.toLowerCase())) return false;
     if (adNetworkVals.length && !adNetworkVals.includes(s.adNetwork)) return false;
     if (currentView === 'needs-attention' && s.action !== 'complete') return false;
-    if (dataCollectionVals.length) {
-      const { dcGeneral } = computeStatus(s);
-      const dcMap = { 'Not Started': 'not-started', 'In Progress': 'in-progress', 'Done': 'done', 'Needs Attention': 'needs-attention' };
-      const matches = dataCollectionVals.some(dc => dcMap[dc] && dcGeneral === dcMap[dc]);
-      if (!matches) return false;
-    }
-    if (siteAnalysisVals.length) {
-      const { saGeneral } = computeStatus(s);
-      const matches = siteAnalysisVals.some(sa => {
-        if (sa === 'Not Started') return saGeneral === 'not-started';
-        if (sa === 'Sent') return saGeneral === 'sent';
-        if (sa === 'In Progress') return saGeneral === 'in-progress';
-        if (sa === 'Accepted') return saGeneral === 'accepted';
-        if (sa === 'Needs Attention') return saGeneral === 'needs-attention';
-        return false;
-      });
-      if (!matches) return false;
-    }
-    if (siteSetupVals.length) {
-      const { ssGeneral } = computeStatus(s);
-      const ssMap = { 'Not Started': 'not-started', 'In Progress': 'in-progress', 'Done': 'done', 'Needs Attention': 'needs-attention' };
-      const matches = siteSetupVals.some(ss => ssMap[ss] && ssGeneral === ssMap[ss]);
-      if (!matches) return false;
-    }
-    if (secondAnalysisVals.length) {
-      const { sa2General } = computeStatus(s);
-      const matches = secondAnalysisVals.some(sa2 => {
-        if (sa2 === 'Not Started') return sa2General === 'not-started';
-        if (sa2 === 'Sent') return sa2General === 'sa2-needs-accept' || sa2General === 'sa2-needs-accept-late';
-        if (sa2 === 'Requested CSVs') return sa2General === 'sa2-requested' || sa2General === 'sa2-requested-late';
-        if (sa2 === 'In Progress') return sa2General === 'sa2-in-progress';
-        if (sa2 === 'Accepted') return sa2General === 'sa2-accepted';
-        if (sa2 === 'Needs Attention') return sa2General === 'sa2-requested-late' || sa2General === 'sa2-needs-accept-late';
-        return false;
-      });
-      if (!matches) return false;
-    }
     const actualStartFrom = document.getElementById('filterActualStartDateFrom')?.value;
     const actualStartTo = document.getElementById('filterActualStartDateTo')?.value;
     const expectedInstallFrom = document.getElementById('filterExpectedInstallDateFrom')?.value;
@@ -2157,19 +1931,6 @@ function filterTable() {
     if (!dateInRange((s.scheduledInstallDate || s.installDate) || '', scheduledInstallFrom, scheduledInstallTo)) return false;
     const sa2Date = s.secondAnalysis?.stateStartedAt ? new Date(s.secondAnalysis.stateStartedAt).toISOString().slice(0,10) : '';
     if (!dateInRange(sa2Date, secondAnalysisFrom, secondAnalysisTo)) return false;
-    if (setupIDVerificationVals.length) {
-      const ss = s.siteSetup || {};
-      let idVer = (ss.identityVerification || ss.verification || '').replace(/-/g,' ').toLowerCase();
-      if (idVer === 'done') idVer = 'approved';
-      const matches = setupIDVerificationVals.some(fv => idVer === fv.replace(/-/g,' ').toLowerCase());
-      if (!matches) return false;
-    }
-    if (paymentTaxVals.length) {
-      const ss = s.siteSetup || {};
-      const pt = (ss.paymentTaxInfo || ss.payment || '').replace(/-/g,' ');
-      const matches = paymentTaxVals.some(pv => pt.toLowerCase() === pv.replace(/-/g,' ').toLowerCase());
-      if (!matches) return false;
-    }
     if (serviceLevelVals.length && !serviceLevelVals.includes(s.serviceLevel || '')) return false;
     if (ownerVals.length && !ownerVals.includes(s.owner || '')) return false;
     return true;
@@ -2233,9 +1994,7 @@ function clearSearch() {
 
 function clearFilters() {
   const selectIds = [
-    'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner',
-    'filterDataCollection', 'filterGAM', 'filterDomain', 'filterIDVerification', 'filterAddressVerification',
-    'filterSiteAnalysis', 'filterSiteSetup', 'filterSecondAnalysis', 'filterSetupIDVerification', 'filterPaymentTax'
+    'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner'
   ];
   selectIds.forEach(id => {
     const el = document.getElementById(id);
@@ -2281,9 +2040,7 @@ function updateNotes(siteName, note) {
 
 function initMultiselectDropdowns() {
   const MULTISELECT_IDS = [
-    'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner',
-    'filterDataCollection', 'filterGAM', 'filterDomain', 'filterIDVerification', 'filterAddressVerification',
-    'filterSiteAnalysis', 'filterSiteSetup', 'filterSecondAnalysis', 'filterSetupIDVerification', 'filterPaymentTax'
+    'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner'
   ];
   MULTISELECT_IDS.forEach(selId => {
     const sel = document.getElementById(selId);
