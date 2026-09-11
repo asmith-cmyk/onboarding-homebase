@@ -547,6 +547,25 @@
     font-weight: 500;
   }
   .site-name-cell a:hover { text-decoration: underline; }
+  .multi-site-badge, .project-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .multi-site-badge { margin-left: 6px; padding: 4px 6px; color: var(--blue); background: var(--blue-bg); }
+  .project-status-badge { padding: 5px 7px; color: var(--text-muted); background: var(--gray-bg); }
+  .project-status-badge.active, .project-status-badge.completed { color: var(--green); background: var(--green-bg); }
+  .project-status-badge.planning, .project-status-badge.pending { color: var(--amber); background: var(--amber-bg); }
+  .project-status-badge.on-hold, .project-status-badge.cancelled { color: var(--red); background: var(--red-bg); }
+  .project-health { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+  .project-health::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--text-light); }
+  .project-health.green::before { background: var(--green); }
+  .project-health.yellow::before { background: #d49a00; }
+  .project-health.red::before { background: var(--red); }
   .site-url {
     color: var(--blue);
     text-decoration: none;
@@ -1232,28 +1251,6 @@
   <div class="table-wrap">
     <div class="table-toolbar">
       <h2>Site Progress Overview</h2>
-      <div class="toolbar-right">
-        <div class="toggle-group">
-          <button class="active" id="viewTable" onclick="setViewMode('table', this)">Table</button>
-          <button id="viewCard" onclick="setViewMode('card', this)">Card</button>
-        </div>
-        <div class="toggle-group">
-          <button class="active" onclick="setView('all', this)">All Sites</button>
-          <button onclick="setView('needs-attention', this)">Needs Attention Only</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end;">
-      <div class="bulk-bar">
-        <select class="bulk-select">
-          <option>Bulk Actions</option>
-          <option>Send follow up</option>
-          <option>Initial Analysis Acceptance</option>
-          <option>2nd Analysis Data Collection</option>
-        </select>
-        <button class="btn btn-complete" style="padding:6px 14px">Apply</button>
-      </div>
     </div>
 
     <div id="tableView">
@@ -1265,6 +1262,8 @@
         <tr>
           <th style="width:32px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
           <th class="col-site sortable" data-sort="name">Site Name</th>
+          <th class="col-badge sortable" data-sort="projectStatus">Project Status</th>
+          <th class="col-badge sortable" data-sort="projectHealth">Project Health</th>
           <th class="col-ad-network sortable" data-sort="adNetwork">Ad Network</th>
           <th class="col-owner sortable" data-sort="owner">Owner</th>
           <th class="col-badge sortable" data-sort="dcGeneral">Data Collection</th>
@@ -1272,7 +1271,6 @@
           <th class="col-badge sortable" data-sort="saGeneral">Site Analysis</th>
           <th class="col-badge sortable" data-sort="ssGeneral">Site Setup</th>
           <th class="col-badge sortable" data-sort="sa2General">Second Analysis</th>
-          <th class="col-badge">What's Next</th>
           <th class="col-badge"><span class="date-col-header"><select class="date-type-select" onchange="setDynamicDateType(this.value)" onclick="event.stopPropagation()"><option value="actualStartDate">Actual Start Date</option><option value="secondAnalysisDate">Second Analysis Date</option><option value="expectedInstallDate">Expected Install Date</option><option value="scheduledInstallDate">Scheduled Install Date</option></select><span class="sortable sort-indicator" data-sort="dynamicDate" onclick="event.stopPropagation(); sortByColumn('dynamicDate')" title="Sort">↕</span></span></th>
           <th class="col-badge sortable" data-sort="lastUpdated">Zendesk Ticket</th>
           <th class="col-notes">Notes</th>
@@ -1283,8 +1281,6 @@
     </table>
     </div>
     </div>
-
-    <div id="cardContainer" class="card-grid" style="display:none; padding: 16px;"></div>
 
     <div class="table-footer">
       <p><span id="footerCount">0 sites</span> displayed</p>
@@ -1492,6 +1488,13 @@ const SITES = [
     action: 'continue'
   }
 ];
+
+const PROJECT_STATUS_VALUES = ['Active', 'Completed', 'Planning', 'On Hold', 'Pending', 'Inactive', 'Cancelled'];
+const PROJECT_HEALTH_VALUES = ['green', 'green', 'yellow', 'red'];
+SITES.forEach((site, index) => {
+  site.projectStatus = PROJECT_STATUS_VALUES[index % PROJECT_STATUS_VALUES.length];
+  site.projectHealth = PROJECT_HEALTH_VALUES[index % PROJECT_HEALTH_VALUES.length];
+});
 
 // Compute derived general statuses based on business rules
 function computeStatus(site) {
@@ -1795,16 +1798,12 @@ function getWhatsNext(site) {
 
 function renderTable(sites) {
   const tbody = document.getElementById('tableBody');
-  const cardContainer = document.getElementById('cardContainer');
   const tableView = document.getElementById('tableView');
   tbody.innerHTML = '';
-  if (cardContainer) cardContainer.innerHTML = '';
   expandedRows.clear();
 
-  const viewMode = document.getElementById('viewTable')?.classList.contains('active') ? 'table' : 'card';
-  if (tableView) tableView.style.display = viewMode === 'table' ? '' : 'none';
-  if (cardContainer) cardContainer.style.display = viewMode === 'card' ? '' : 'none';
-  if (viewMode === 'table') expandedCardSite = null;
+  if (tableView) tableView.style.display = '';
+  expandedCardSite = null;
 
   sites.forEach(site => {
     const key = site.name.replace(/\s/g,'_');
@@ -1827,8 +1826,10 @@ function renderTable(sites) {
       <td><input type="checkbox" class="row-check"></td>
       <td class="site-name-cell">
         <button class="expand-btn" id="btn-${key}" onclick="toggleRow('${site.name}', event)">▶</button>
-        <a href="#">${site.name}</a>
+        <a href="#">${site.name}</a>${site.multisiteCount > 1 ? `<span class="multi-site-badge">Multi-site · ${site.multisiteCount}</span>` : ''}
       </td>
+      <td><span class="project-status-badge ${site.projectStatus.toLowerCase().replace(/\s/g, '-')}">${site.projectStatus}</span></td>
+      <td><span class="project-health ${site.projectHealth}">${site.projectHealth[0].toUpperCase() + site.projectHealth.slice(1)}</span></td>
       <td>${site.adNetwork || '—'}</td>
       <td class="col-owner"><select class="owner-select" onchange="updateOwner('${site.name}', this.value)" onclick="event.stopPropagation()">${ownerOptions}</select></td>
       <td>${badgeHtml(dcGeneral)}</td>
@@ -1836,40 +1837,12 @@ function renderTable(sites) {
       <td>${badgeHtml(saGeneral)}</td>
       <td>${badgeHtml(ssGeneral)}</td>
       <td>${badgeHtml(sa2General)}</td>
-      <td class="whats-next-cell">${getWhatsNext(site)}${site.emailResponseNeeded ? '<span class="whats-next-email-alert">Email response needed</span>' : ''}</td>
       <td><input type="date" class="install-date-input" value="${dynamicDateVal}" onchange="updateDynamicDate('${site.name}', this.value)" onclick="event.stopPropagation()"></td>
       <td class="zen-ticket-cell"><a href="https://raptive.zendesk.com/agent/home/tickets" target="_blank" class="btn-link-zen">&#128172; Ticket</a><span class="zen-ticket-date">${formatDateMdY(site.lastUpdated)}</span></td>
       <td><input type="text" class="notes-input" placeholder="Add note..." value="${(site.notes || '').replace(/"/g,'&quot;')}" title="${(site.notes || 'Click to add note').replace(/"/g,'&quot;')}" data-site-name="${(site.name || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onchange="updateNotes(this.dataset.siteName, this.value)" onblur="updateNotes(this.dataset.siteName, this.value)" onclick="event.stopPropagation()"></td>`;
 
     tbody.appendChild(tr);
 
-    if (cardContainer && viewMode === 'card') {
-      const card = document.createElement('div');
-      card.className = 'site-card' + (expandedCardSite === site.name ? ' expanded' : '') + (site.multisiteCount > 1 ? ' multisite-group' : '');
-      card.dataset.siteName = site.name;
-      card.onclick = () => { expandedCardSite = expandedCardSite === site.name ? null : site.name; filterTable(); };
-      const schedInstall = formatDateMdY(site.scheduledInstallDate || site.installDate);
-      const lastUpd = formatDateMdY(site.lastUpdated);
-      card.innerHTML = `
-        <div class="card-header"><span class="card-header-left"><strong>${site.name}</strong></span><span class="card-badge">${site.progress}%</span></div>
-        <div class="card-meta">${site.creatorName || '—'} · ${site.adNetwork || '—'}</div>
-        <div class="card-dates"><span class="date-line">Last Updated: ${lastUpd}</span><span class="date-line">Scheduled Install Date: ${schedInstall}</span></div>
-        <div class="card-next-step"><span class="label">Next:</span> ${nextStep}</div>
-        <div class="card-statuses">
-          <div class="card-status-item"><span class="phase-name">Data Collection</span><span>${badgeHtml(dcGeneral)}</span></div>
-          <div class="card-status-item"><span class="phase-name">Google Ad Manager</span><span>${badgeHtml(gamGeneral)}</span></div>
-          <div class="card-status-item"><span class="phase-name">Site Analysis</span><span>${badgeHtml(saGeneral)}</span></div>
-          <div class="card-status-item"><span class="phase-name">Site Setup</span><span>${badgeHtml(ssGeneral)}</span></div>
-          <div class="card-status-item"><span class="phase-name">Second Analysis</span><span>${badgeHtml(sa2General)}</span></div>
-        </div>`;
-      cardContainer.appendChild(card);
-      if (expandedCardSite === site.name) {
-        const detailsRow = document.createElement('div');
-        detailsRow.className = 'card-details-row';
-        detailsRow.innerHTML = `<div class="expanded-content">${expandedContentHtml(site)}</div>`;
-        cardContainer.appendChild(detailsRow);
-      }
-    }
   });
 
   document.getElementById('footerCount').textContent = `${sites.length} site${sites.length !== 1 ? 's' : ''} displayed`;
@@ -2005,6 +1978,8 @@ function filterTable() {
 function getSortValue(site, col) {
   if (col === 'name') return (site.name || '').toLowerCase();
   if (col === 'adNetwork') return (site.adNetwork || '').toLowerCase();
+  if (col === 'projectStatus') return (site.projectStatus || '').toLowerCase();
+  if (col === 'projectHealth') return (site.projectHealth || '').toLowerCase();
   if (col === 'owner') return (site.owner || '').toLowerCase();
   if (col === 'lastUpdated') return site.lastUpdated || '';
   if (col === 'dynamicDate') return getDynamicDateValue(site) || '';
