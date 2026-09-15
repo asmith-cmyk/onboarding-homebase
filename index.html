@@ -407,7 +407,12 @@
     border-radius: 8px;
     padding: 16px 20px;
     text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.15s;
   }
+  .stat-card:hover { border-color: var(--accent); box-shadow: 0 3px 10px rgba(28, 61, 46, 0.10); transform: translateY(-1px); }
+  .stat-card:focus-visible { outline: 3px solid rgba(45, 122, 79, 0.25); outline-offset: 2px; }
+  .stat-card.active { border-color: var(--accent); background: #f4faf6; box-shadow: inset 0 0 0 1px var(--accent); }
   .stat-card .value {
     font-size: 26px;
     font-weight: 600;
@@ -1087,19 +1092,19 @@
 
   <!-- Stats -->
   <div class="stats-bar">
-    <div class="stat-card todays-projects">
+    <div class="stat-card todays-projects" role="button" tabindex="0" aria-pressed="false" onclick="toggleStatFilter('today-projects')" onkeydown="onStatCardKeydown(event, 'today-projects')" title="Show today's projects">
       <div class="value">2</div>
       <div class="label">Today's Projects</div>
       </div>
-    <div class="stat-card needs-attention">
+    <div class="stat-card needs-attention" role="button" tabindex="0" aria-pressed="false" onclick="toggleStatFilter('needs-attention')" onkeydown="onStatCardKeydown(event, 'needs-attention')" title="Show sites that need attention">
       <div class="value">5</div>
       <div class="label">Needs Attention</div>
     </div>
-    <div class="stat-card done">
+    <div class="stat-card done" role="button" tabindex="0" aria-pressed="false" onclick="toggleStatFilter('pending-install')" onkeydown="onStatCardKeydown(event, 'pending-install')" title="Show sites pending install">
       <div class="value">2</div>
       <div class="label">Pending Install</div>
     </div>
-    <div class="stat-card pending-2a">
+    <div class="stat-card pending-2a" role="button" tabindex="0" aria-pressed="false" onclick="toggleStatFilter('pending-2a')" onkeydown="onStatCardKeydown(event, 'pending-2a')" title="Show sites pending second analysis">
       <div class="value">6</div>
       <div class="label">Pending 2a</div>
     </div>
@@ -1250,7 +1255,7 @@
   <!-- Table Section -->
   <div class="table-wrap">
     <div class="table-toolbar">
-      <h2>Site Progress Overview</h2>
+      <h2 id="tableTitle">Site Progress Overview</h2>
     </div>
 
     <div id="tableView">
@@ -1495,6 +1500,45 @@ SITES.forEach((site, index) => {
   site.projectStatus = PROJECT_STATUS_VALUES[index % PROJECT_STATUS_VALUES.length];
   site.projectHealth = PROJECT_HEALTH_VALUES[index % PROJECT_HEALTH_VALUES.length];
 });
+
+const SUMMARY_FILTERS = {
+  'today-projects': new Set(['FinanceHacks', 'TravelDiaries']),
+  'pending-install': new Set(['GreenWorld Blog', 'MusicZone Daily']),
+  'pending-2a': new Set(['GreenWorld Blog', 'FinanceHacks', 'TravelDiaries', 'CookingCorner', 'SportsUncut', 'ParentingNow'])
+};
+const SUMMARY_FILTER_LABELS = {
+  'today-projects': "Today's Projects",
+  'needs-attention': 'Needs Attention',
+  'pending-install': 'Pending Install',
+  'pending-2a': 'Pending 2A'
+};
+let activeStatFilter = null;
+
+function updateStatCards() {
+  document.querySelectorAll('.stat-card').forEach(card => {
+    const key = card.classList.contains('todays-projects') ? 'today-projects'
+      : card.classList.contains('needs-attention') ? 'needs-attention'
+      : card.classList.contains('pending-2a') ? 'pending-2a' : 'pending-install';
+    const isActive = key === activeStatFilter;
+    card.classList.toggle('active', isActive);
+    card.setAttribute('aria-pressed', String(isActive));
+  });
+  const title = document.getElementById('tableTitle');
+  if (title) title.textContent = activeStatFilter ? `Site Progress Overview · ${SUMMARY_FILTER_LABELS[activeStatFilter]}` : 'Site Progress Overview';
+}
+
+function toggleStatFilter(filter) {
+  activeStatFilter = activeStatFilter === filter ? null : filter;
+  updateStatCards();
+  filterTable();
+}
+
+function onStatCardKeydown(event, filter) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    toggleStatFilter(filter);
+  }
+}
 
 // Compute derived general statuses based on business rules
 function computeStatus(site) {
@@ -1933,6 +1977,8 @@ function filterTable() {
     }
     if (siteStatusVals.length && !siteStatusVals.includes(s.siteStatus)) return false;
     if (adNetworkVals.length && !adNetworkVals.includes(s.adNetwork)) return false;
+    if (activeStatFilter === 'needs-attention' && s.action !== 'complete') return false;
+    if (activeStatFilter && activeStatFilter !== 'needs-attention' && !SUMMARY_FILTERS[activeStatFilter]?.has(s.name)) return false;
     if (currentView === 'needs-attention' && s.action !== 'complete') return false;
     if (activePreset === 'persona-issues') {
       const personaVer = (s.siteSetup?.identityVerification || s.siteSetup?.verification || '').replace(/-/g,' ').toLowerCase();
@@ -2031,6 +2077,8 @@ function clearFilters() {
     'filterSiteStatus', 'filterAdNetwork', 'filterServiceLevel', 'filterOwner'
   ];
   activePreset = null;
+  activeStatFilter = null;
+  updateStatCards();
   document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
   selectIds.forEach(id => {
     const el = document.getElementById(id);
