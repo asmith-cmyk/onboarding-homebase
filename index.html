@@ -1500,6 +1500,10 @@ SITES.forEach((site, index) => {
   site.projectStatus = PROJECT_STATUS_VALUES[index % PROJECT_STATUS_VALUES.length];
   site.projectHealth = PROJECT_HEALTH_VALUES[index % PROJECT_HEALTH_VALUES.length];
 });
+['Foodie Finds', 'SportsUncut', 'Travel Tales'].forEach(name => {
+  const site = SITES.find(item => item.name === name);
+  if (site) site.projectStatus = 'Active';
+});
 
 const SUMMARY_FILTERS = {
   'today-projects': new Set(['FinanceHacks', 'TravelDiaries']),
